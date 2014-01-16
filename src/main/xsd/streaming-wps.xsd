@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2014 Christian Autermann
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation; either version 2
+    of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+-->
+<xs:schema version="1.0"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:wps="http://www.opengis.net/wps/1.0.0"
+           xmlns:ows="http://www.opengis.net/ows/1.1"
+           xmlns:wsa="http://www.w3.org/2005/08/addressing"
+           xmlns:xlink="http://www.w3.org/1999/xlink"
+           xmlns:tns="https://github.com/autermann/streaming-wps"
+           xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+           targetNamespace="https://github.com/autermann/streaming-wps">
+
+    <xs:import namespace="http://www.opengis.net/wps/1.0.0"
+               schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd" />
+    <xs:import namespace="http://www.opengis.net/ows/1.1"
+               schemaLocation="http://schemas.opengis.net/ows/1.1.0/owsAll.xsd" />
+    <xs:import namespace="http://www.w3.org/1999/xlink"
+               schemaLocation="http://www.w3.org/1999/xlink.xsd" />
+    <xs:import namespace="http://www.w3.org/2005/08/addressing"
+               schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd" />
+    <xs:import namespace="http://www.w3.org/2003/05/soap-envelope"
+               schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
+
+    <xs:element name="ProcessID" type="tns:ProcessIDType" />
+    <xs:complexType name="ProcessIDType">
+        <xs:simpleContent>
+            <xs:extension base="xs:anyURI" />
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:element name="InputMessage" type="tns:InputMessageType" />
+    <xs:complexType name="InputMessageType">
+        <xs:sequence>
+            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="tns:Inputs" />
+        </xs:sequence>
+        <xs:attribute name="receiveFaults"  type="xs:boolean"  use="optional" default="false"/>
+    </xs:complexType>
+
+    <xs:element name="Inputs" type="tns:InputsType" />
+    <xs:complexType name="InputsType">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element ref="tns:ReferenceInput" />
+            <xs:element ref="tns:StreamingInput" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:element name="StreamingInput" type="tns:StreamingInputType" />
+    <xs:complexType name="StreamingInputType">
+        <xs:complexContent>
+            <xs:extension base="wps:InputType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="ReferenceInput" type="tns:ReferenceInputType" />
+    <xs:complexType name="ReferenceInputType">
+        <xs:sequence>
+            <xs:element ref="ows:Identifier" />
+            <xs:element name="Reference">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element ref="wsa:MessageID" />
+                        <xs:element name="Output" type="ows:CodeType" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="OutputMessage" type="tns:OutputMessageType" />
+    <xs:complexType name="OutputMessageType">
+        <xs:sequence>
+            <xs:element ref="tns:ProcessID" />
+            <!--<xs:element name="Inputs" type="wps:DataInputsType" minOccurs="0"/>-->
+            <xs:element ref="tns:Outputs" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="Outputs" type="tns:OutputsType" />
+    <xs:complexType name="OutputsType">
+        <xs:sequence>
+            <xs:element ref="tns:Output" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="Output" type="wps:OutputDataType"/>
+
+    <xs:element name="OutputRequestMessage" type="tns:OutputRequestMessageType" />
+    <xs:complexType name="OutputRequestMessageType">
+        <xs:sequence>
+            <xs:element ref="tns:ProcessID" />
+        </xs:sequence>
+        <xs:attribute name="includeInputs" type="xs:boolean" use="optional" default="false"/>
+    </xs:complexType>
+
+
+    <xs:element name="StopMessage" type="tns:StopMessageType" />
+    <xs:complexType name="StopMessageType">
+        <xs:sequence>
+            <xs:element ref="tns:ProcessID" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="ErrorMessage" type="tns:ErrorMessageType" />
+    <xs:complexType name="ErrorMessageType">
+        <xs:sequence>
+            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="ows:Exception" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

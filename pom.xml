@@ -40,12 +40,34 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <wps-version>3.3.0-SNAPSHOT</wps-version>
-        <jetty-version>9.0.6.v20130930</jetty-version>
-        <matlab-version>2.0-SNAPSHOT</matlab-version>
+        <jetty-version>9.1.0.v20131115</jetty-version>
         <slf4j-version>1.7.5</slf4j-version>
         <xml-version>1.1.0</xml-version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jgrapht</groupId>
+            <artifactId>jgrapht</artifactId>
+            <version>0.8.3</version>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -53,13 +75,13 @@
         </dependency>
         <dependency>
             <groupId>com.github.autermann</groupId>
-            <artifactId>sockets</artifactId>
+            <artifactId>yaml</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.autermann</groupId>
-            <artifactId>yaml</artifactId>
-            <version>1.0.1</version>
+            <artifactId>utils</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.n52.wps</groupId>
@@ -115,12 +137,49 @@
             <artifactId>52n-xml-wps-v100</artifactId>
             <version>${xml-version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.n52.sensorweb</groupId>
             <artifactId>52n-xml-ows-v110</artifactId>
             <version>${xml-version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.n52.sensorweb</groupId>
+            <artifactId>52n-xml-soap-v12</artifactId>
+            <version>1.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.sensorweb</groupId>
+            <artifactId>52n-xml-wsa-v10</artifactId>
+            <version>1.1.5</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-client</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>javax-websocket-client-impl</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-server</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>javax-websocket-server-impl</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
@@ -276,15 +335,26 @@
                     <header>src/main/misc/license-header.txt</header>
                     <includes>
                         <include>**/*.java</include>
+                        <include>**/*.xml</include>
+                        <include>**/*.xsd</include>
                     </includes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                        <year>2013</year>
+                        <year>2014</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>format-license-headers</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -349,6 +419,28 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xmlbeans-maven-plugin</artifactId>
+                <version>2.3.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>xmlbeans</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaDirectory>src/main/xsd</schemaDirectory>
+                    <javaSource>1.6</javaSource>
+                    <download>true</download>
+                    <xmlConfigs>
+                        <xmlConfig implementation="java.io.File">
+                            src/main/xsd/xsdconfig.xml
+                        </xmlConfig>
+                    </xmlConfigs>
+                </configuration>
             </plugin>
         </plugins>
     </build>
