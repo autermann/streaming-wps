@@ -15,13 +15,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
+package com.github.autermann.wps.streaming.delegate;
 
+import org.n52.wps.io.data.IComplexData;
 
-import java.net.URI;
-
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
 import com.google.common.base.Preconditions;
 
 /**
@@ -29,21 +26,25 @@ import com.google.common.base.Preconditions;
  *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public class ProcessDescriptionBinding implements IComplexData {
+    private final ProcessDescription processDescription;
 
-    private ProcessInputs payload;
+    public ProcessDescriptionBinding(ProcessDescription processDescription) {
+        this.processDescription = Preconditions.checkNotNull(processDescription);
+    }
 
     @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
+    public void dispose() {
     }
 
-    public ProcessInputs getPayload() {
-        return this.payload;
+    @Override
+    public ProcessDescription getPayload() {
+        return processDescription;
     }
 
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
+    @Override
+    public Class<?> getSupportedClass() {
+        return ProcessDescription.class;
     }
 
 }

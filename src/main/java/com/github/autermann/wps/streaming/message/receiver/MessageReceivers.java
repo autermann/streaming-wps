@@ -15,35 +15,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
+package com.github.autermann.wps.streaming.message.receiver;
 
+import com.github.autermann.wps.streaming.message.Message;
 
-import java.net.URI;
+public final class MessageReceivers {
 
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
+    private static final MessageReceiver NULL = new MessageReceiver() {
+        @Override public void receive(Message message) {}
+    };
 
-/**
- * TODO JavaDoc
- *
- * @author Christian Autermann
- */
-public class InputMessage extends Message {
-
-    private ProcessInputs payload;
-
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
-    }
-
-    public ProcessInputs getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
+    public static MessageReceiver nullReceiver() {
+        return NULL;
     }
 
 }

@@ -18,14 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 -->
-<xs:schema version="1.0"
-           elementFormDefault="qualified"
+<xs:schema version="1.0" elementFormDefault="qualified"
+           xmlns="https://github.com/autermann/streaming-wps"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:wps="http://www.opengis.net/wps/1.0.0"
            xmlns:ows="http://www.opengis.net/ows/1.1"
            xmlns:wsa="http://www.w3.org/2005/08/addressing"
            xmlns:xlink="http://www.w3.org/1999/xlink"
-           xmlns:tns="https://github.com/autermann/streaming-wps"
            xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
            targetNamespace="https://github.com/autermann/streaming-wps">
 
@@ -40,38 +39,35 @@
     <xs:import namespace="http://www.w3.org/2003/05/soap-envelope"
                schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
 
-    <xs:element name="ProcessID" type="tns:ProcessIDType" />
+    <xs:include schemaLocation="staticInputs.xsd" />
+
+    <xs:element name="ProcessID" type="ProcessIDType" />
     <xs:complexType name="ProcessIDType">
         <xs:simpleContent>
             <xs:extension base="xs:anyURI" />
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:element name="InputMessage" type="tns:InputMessageType" />
+    <xs:element name="InputMessage" type="InputMessageType" />
     <xs:complexType name="InputMessageType">
         <xs:sequence>
-            <xs:element ref="tns:ProcessID" />
-            <xs:element ref="tns:Inputs" />
+            <xs:element ref="ProcessID" />
+            <xs:element ref="Inputs" />
         </xs:sequence>
         <xs:attribute name="receiveFaults"  type="xs:boolean"  use="optional" default="false"/>
     </xs:complexType>
 
-    <xs:element name="Inputs" type="tns:InputsType" />
+    <xs:element name="Inputs" type="InputsType" />
     <xs:complexType name="InputsType">
         <xs:choice maxOccurs="unbounded">
-            <xs:element ref="tns:ReferenceInput" />
-            <xs:element ref="tns:StreamingInput" />
+            <xs:element ref="ReferenceInput" />
+            <xs:element ref="StreamingInput" />
         </xs:choice>
     </xs:complexType>
 
-    <xs:element name="StreamingInput" type="tns:StreamingInputType" />
-    <xs:complexType name="StreamingInputType">
-        <xs:complexContent>
-            <xs:extension base="wps:InputType" />
-        </xs:complexContent>
-    </xs:complexType>
+    <xs:element name="StreamingInput" type="wps:InputType" />
 
-    <xs:element name="ReferenceInput" type="tns:ReferenceInputType" />
+    <xs:element name="ReferenceInput" type="ReferenceInputType" />
     <xs:complexType name="ReferenceInputType">
         <xs:sequence>
             <xs:element ref="ows:Identifier" />
@@ -86,46 +82,45 @@
         </xs:sequence>
     </xs:complexType>
 
-    <xs:element name="OutputMessage" type="tns:OutputMessageType" />
+    <xs:element name="OutputMessage" type="OutputMessageType" />
     <xs:complexType name="OutputMessageType">
         <xs:sequence>
-            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="ProcessID" />
             <!--<xs:element name="Inputs" type="wps:DataInputsType" minOccurs="0"/>-->
-            <xs:element ref="tns:Outputs" />
+            <xs:element ref="Outputs" />
         </xs:sequence>
     </xs:complexType>
 
-    <xs:element name="Outputs" type="tns:OutputsType" />
+    <xs:element name="Outputs" type="OutputsType" />
     <xs:complexType name="OutputsType">
         <xs:sequence>
-            <xs:element ref="tns:Output" maxOccurs="unbounded" />
+            <xs:element ref="Output" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
 
     <xs:element name="Output" type="wps:OutputDataType"/>
 
-    <xs:element name="OutputRequestMessage" type="tns:OutputRequestMessageType" />
+    <xs:element name="OutputRequestMessage" type="OutputRequestMessageType" />
     <xs:complexType name="OutputRequestMessageType">
         <xs:sequence>
-            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="ProcessID" />
         </xs:sequence>
         <xs:attribute name="includeInputs" type="xs:boolean" use="optional" default="false"/>
     </xs:complexType>
 
 
-    <xs:element name="StopMessage" type="tns:StopMessageType" />
+    <xs:element name="StopMessage" type="StopMessageType" />
     <xs:complexType name="StopMessageType">
         <xs:sequence>
-            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="ProcessID" />
         </xs:sequence>
     </xs:complexType>
 
-    <xs:element name="ErrorMessage" type="tns:ErrorMessageType" />
+    <xs:element name="ErrorMessage" type="ErrorMessageType" />
     <xs:complexType name="ErrorMessageType">
         <xs:sequence>
-            <xs:element ref="tns:ProcessID" />
+            <xs:element ref="ProcessID" />
             <xs:element ref="ows:Exception" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
-
 </xs:schema>

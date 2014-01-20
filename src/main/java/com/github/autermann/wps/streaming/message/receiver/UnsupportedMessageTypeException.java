@@ -15,35 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
+package com.github.autermann.wps.streaming.message.receiver;
 
-
-import java.net.URI;
-
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
+import com.github.autermann.wps.streaming.message.Message;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public class UnsupportedMessageTypeException extends RuntimeException {
 
-    private ProcessInputs payload;
-
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
-    }
-
-    public ProcessInputs getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
+    public UnsupportedMessageTypeException(Message message) {
+        super("Message " + message + " is not supported");
     }
 
 }

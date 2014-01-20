@@ -20,7 +20,7 @@ package com.github.autermann.wps.streaming.message;
 import java.net.URI;
 
 import com.github.autermann.wps.streaming.data.StreamingError;
-import com.github.autermann.wps.streaming.util.SOAPConstants;
+import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**
  * TODO JavaDoc
@@ -40,7 +40,7 @@ public class ErrorMessage extends Message {
 
     @Override
     public URI getSOAPAction() {
-        return SOAPConstants.getErrorActionURI();
+        return SoapConstants.getErrorActionURI();
     }
 
 }

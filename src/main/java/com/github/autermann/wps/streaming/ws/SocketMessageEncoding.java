@@ -38,14 +38,14 @@ import org.w3.x2005.x08.addressing.ActionDocument;
 import org.w3.x2005.x08.addressing.AttributedURIType;
 
 import com.github.autermann.wps.streaming.message.Message;
-import com.github.autermann.wps.streaming.util.WSAConstants;
-import com.github.autermann.wps.streaming.xml.AbstractMessageEncoding;
-import com.github.autermann.wps.streaming.xml.ErrorMessageEncoding;
-import com.github.autermann.wps.streaming.xml.InputMessageEncoding;
-import com.github.autermann.wps.streaming.xml.MessageEncoding;
-import com.github.autermann.wps.streaming.xml.OutputMessageEncoding;
-import com.github.autermann.wps.streaming.xml.OutputRequestMessageEncoding;
-import com.github.autermann.wps.streaming.xml.StopMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.AbstractMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.InputMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.MessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.OutputMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.OutputRequestMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.StopMessageEncoding;
+import com.github.autermann.wps.streaming.util.SchemaConstants;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 
@@ -54,7 +54,7 @@ import com.google.common.io.CharStreams;
  *
  * @author Christian Autermann
  */
-public abstract class SocketMessageEncoding
+public class SocketMessageEncoding
         implements Encoder.TextStream<Message>,
                    Decoder.TextStream<Message> {
 
@@ -96,7 +96,7 @@ public abstract class SocketMessageEncoding
             if (header == null) {
                 throw new DecodeException(string, "Missing SOAP header");
             }
-            XmlObject[] actions = header.selectChildren(WSAConstants.QN_ACTION);
+            XmlObject[] actions = header.selectChildren(SchemaConstants.QN_WSA_ACTION);
             if (actions == null || actions.length == 0) {
                 throw new DecodeException(string, "Message has no action header");
             }

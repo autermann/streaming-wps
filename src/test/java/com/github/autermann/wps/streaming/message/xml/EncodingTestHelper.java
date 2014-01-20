@@ -15,35 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
+package com.github.autermann.wps.streaming.message.xml;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 
-import java.net.URI;
-
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
+import net.opengis.ows.x11.BoundingBoxType;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public class EncodingTestHelper {
 
-    private ProcessInputs payload;
-
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
+    static BoundingBoxType createBoundingBox() {
+        BoundingBoxType boundingBox = BoundingBoxType.Factory.newInstance();
+        boundingBox.setCrs("EPSG:4326");
+        boundingBox.setDimensions(BigInteger.valueOf(2l));
+        boundingBox.setLowerCorner(Arrays.asList("52.2", "7"));
+        boundingBox.setUpperCorner(Arrays.asList("55.2", "15"));
+        return boundingBox;
     }
-
-    public ProcessInputs getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
-    }
-
 }

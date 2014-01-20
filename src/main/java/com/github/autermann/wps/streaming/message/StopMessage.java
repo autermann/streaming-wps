@@ -19,7 +19,7 @@ package com.github.autermann.wps.streaming.message;
 
 import java.net.URI;
 
-import com.github.autermann.wps.streaming.util.SOAPConstants;
+import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**
  * TODO JavaDoc
@@ -30,7 +30,7 @@ public class StopMessage extends Message {
 
     @Override
     public URI getSOAPAction() {
-        return SOAPConstants.getStopActionURI();
+        return SoapConstants.getStopActionURI();
     }
 
 }

@@ -19,7 +19,6 @@ package com.github.autermann.wps.streaming.util;
 
 import java.net.URI;
 
-import javax.xml.namespace.QName;
 
 /**
  * TODO JavaDoc
@@ -27,9 +26,7 @@ import javax.xml.namespace.QName;
  * @author Christian Autermann
  */
 public interface WSAConstants {
-    String NS = "http://www.w3.org/2005/08/addressing";
     URI ANONYMOUS_ADDRESS = URI.create("http://www.w3.org/2005/08/addressing/anonymous");
     URI NONE_ADDRESS = URI.create("http://www.w3.org/2005/08/addressing/none");
-    String EN_ACTION = "Action";
-    QName QN_ACTION = new QName(NS, EN_ACTION);
+    
 }

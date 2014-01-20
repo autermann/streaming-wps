@@ -17,7 +17,9 @@
  */
 package com.github.autermann.wps.streaming.message;
 
-import com.github.autermann.wps.streaming.StreamingProcess;
+import com.github.autermann.wps.streaming.StreamingProcessID;
+import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
+import com.github.autermann.wps.streaming.message.receiver.MessageReceivers;
 import com.google.common.base.Preconditions;
 
 /**
@@ -25,14 +27,23 @@ import com.google.common.base.Preconditions;
  *
  * @author Christian Autermann
  */
-public abstract class Message extends SOAPMessage {
-    private StreamingProcess.ID processId;
+public abstract class Message extends SoapMessage {
+    private StreamingProcessID processId;
+    private MessageReceiver receiver = MessageReceivers.nullReceiver();
 
-    public StreamingProcess.ID getProcessID() {
+    public StreamingProcessID getProcessID() {
         return this.processId;
     }
 
-    public void setProcessID(StreamingProcess.ID id) {
+    public void setProcessID(StreamingProcessID id) {
         this.processId = Preconditions.checkNotNull(id);
+    }
+
+    public MessageReceiver getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(MessageReceiver receiver) {
+        this.receiver = Preconditions.checkNotNull(receiver);
     }
 }

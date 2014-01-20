@@ -19,12 +19,18 @@ package com.github.autermann.wps.streaming.data;
 
 import org.n52.wps.server.ExceptionReport;
 
+import com.github.autermann.wps.streaming.message.ErrorMessage;
+import com.github.autermann.wps.streaming.message.Message;
+import com.github.autermann.wps.streaming.message.RelationshipType;
+
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
 public class StreamingError extends ExceptionReport {
+
+    public static final String UNRESOLVABLE_INPUT = "UnresolvableInput";
 
     public StreamingError(String message, String errorKey) {
         super(message, errorKey);
@@ -51,4 +57,11 @@ public class StreamingError extends ExceptionReport {
         return locator;
     }
 
+    public ErrorMessage toMessage(Message cause) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setPayload(this);
+        errorMessage.setProcessID(cause.getProcessID());
+        errorMessage.addRelatedMessage(RelationshipType.Reply, cause);
+        return errorMessage;
+    }
 }

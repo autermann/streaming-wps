@@ -15,35 +15,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
-
+package com.github.autermann.wps.streaming.message.xml;
 
 import java.net.URI;
 
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
+import org.apache.xmlbeans.XmlException;
+import org.w3.x2003.x05.soapEnvelope.Envelope;
+
+import com.github.autermann.wps.streaming.message.Message;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public interface MessageEncoding<T extends Message> {
+    T decode(Envelope message) throws XmlException;
 
-    private ProcessInputs payload;
+    String encode(T message) throws XmlException;
 
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
-    }
-
-    public ProcessInputs getPayload() {
-        return this.payload;
-    }
-
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
-    }
-
+    URI getAction();
 }

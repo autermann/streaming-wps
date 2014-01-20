@@ -20,8 +20,8 @@ package com.github.autermann.wps.streaming.message;
 
 import java.net.URI;
 
-import com.github.autermann.wps.streaming.data.StreamingIteration;
-import com.github.autermann.wps.streaming.util.SOAPConstants;
+import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**
  * TODO JavaDoc
@@ -29,18 +29,18 @@ import com.github.autermann.wps.streaming.util.SOAPConstants;
  * @author Christian Autermann
  */
 public class OutputMessage extends Message {
-    private StreamingIteration.Outputs payload;
+    private ProcessOutputs payload;
 
     @Override
     public URI getSOAPAction() {
-        return SOAPConstants.getOutputActionURI();
+        return SoapConstants.getOutputActionURI();
     }
 
-    public StreamingIteration.Outputs getPayload() {
+    public ProcessOutputs getPayload() {
         return this.payload;
     }
 
-    public void setPayload(StreamingIteration.Outputs payload) {
+    public void setPayload(ProcessOutputs payload) {
         this.payload = payload;
     }
 

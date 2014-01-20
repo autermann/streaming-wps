@@ -17,33 +17,35 @@
  */
 package com.github.autermann.wps.streaming.message;
 
-
 import java.net.URI;
-
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public enum RelationshipType {
+    Reply("http://www.w3.org/2005/08/addressing/reply"),
+    Unspecified("http://www.w3.org/2005/08/addressing/unspecified"),
+    Needs("https://github.com/autermann/streaming-wps/needs"),
+    Used("https://github.com/autermann/streaming-wps/used");
+    private final URI uri;
 
-    private ProcessInputs payload;
-
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
+    private RelationshipType(String uri) {
+        this.uri = URI.create(uri);
     }
 
-    public ProcessInputs getPayload() {
-        return this.payload;
+    public URI getUri() {
+        return uri;
     }
 
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
+    public static RelationshipType valueOf(URI uri) {
+        for (RelationshipType type : values()) {
+            if (type.getUri().equals(uri)) {
+                return type;
+            }
+        }
+        return null;
     }
 
 }

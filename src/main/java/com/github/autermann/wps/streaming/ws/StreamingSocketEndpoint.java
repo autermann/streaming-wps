@@ -32,15 +32,11 @@ import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.autermann.wps.streaming.StreamingClientHandler;
-import com.github.autermann.wps.streaming.StreamingHandler;
-import com.github.autermann.wps.streaming.StreamingMessageSink;
-import com.github.autermann.wps.streaming.message.InputMessage;
+import com.github.autermann.wps.streaming.MessageBroker;
+import com.github.autermann.wps.streaming.data.StreamingError;
+import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.Message;
-import com.github.autermann.wps.streaming.message.OutputMessage;
-import com.github.autermann.wps.streaming.message.OutputRequestMessage;
-import com.github.autermann.wps.streaming.message.StopMessage;
-import com.google.common.base.Preconditions;
+import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 
 /**
  * TODO JavaDoc
@@ -50,63 +46,50 @@ import com.google.common.base.Preconditions;
 @ServerEndpoint(value = "/streaming",
                 encoders = SocketMessageEncoding.class,
                 decoders = SocketMessageEncoding.class)
-public class StreamingSocketEndpoint implements StreamingMessageSink {
+public class StreamingSocketEndpoint implements MessageReceiver {
     private static final Logger log = LoggerFactory
             .getLogger(StreamingSocketEndpoint.class);
-    public static final String HANDLER = "handler";
-    private StreamingClientHandler handler;
+    private final MessageBroker broker = MessageBroker.getInstance();
     private Session session;
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig c) {
         log.info("Client session {} opened", session.getId());
-        this.handler
-                = new StreamingClientHandler((StreamingHandler) c
-                        .getUserProperties()
-                        .get(HANDLER), this);
         this.session = session;
-    }
-
-    @OnError
-    public void onError(Throwable cause) {
-        log.info("Client session " + session.getId() + " errrored", cause);
     }
 
     @OnClose
     public void onClose(CloseReason reason) {
         log.info("Client session {} closed: {}", session.getId(), reason);
-        handler.onClose();
     }
 
     @OnMessage
     public void onMessage(Message message) {
-        log.info("Receiving message: {}", message);
-        if (message instanceof InputMessage) {
-            handler.onInputMessage((InputMessage) message);
-        } else if (message instanceof StopMessage) {
-            handler.onStopMessage((StopMessage) message);
-        } else if (message instanceof OutputRequestMessage) {
-            handler.onOutputRequestMessage((OutputRequestMessage) message);
-        } else if (message instanceof OutputMessage) {
-            handler.onOutputMessage((OutputMessage) message);
-        }
+        log.info("Receiving client message: {}", message);
+        message.setReceiver(this);
+        this.broker.receive(message);
+    }
+
+    @OnError
+    public void onError(Throwable cause) {
+        log.info("Client session " + session.getId() + " errored", cause);
+        StreamingError error = new StreamingError("Error while processing message", StreamingError.NO_APPLICABLE_CODE, cause);
+        ErrorMessage message = new ErrorMessage();
+        message.setPayload(error);
+        receive(message);
     }
 
     @Override
-    public void accept(Message message) {
-        Preconditions.checkState(isOpen());
+    public void receive(Message message) {
         try {
-            log.info("Sending message: {}", message);
-            session.getBasicRemote().sendObject(message);
+            if (session != null && session.isOpen()) {
+                log.info("Receiving server message: {}", message);
+                session.getBasicRemote().sendObject(message);
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         } catch (EncodeException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    @Override
-    public boolean isOpen() {
-        return session != null && session.isOpen();
     }
 }

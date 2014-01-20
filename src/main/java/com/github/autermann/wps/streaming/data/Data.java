@@ -17,6 +17,7 @@
  */
 package com.github.autermann.wps.streaming.data;
 
+import com.github.autermann.wps.commons.Format;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 

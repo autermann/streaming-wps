@@ -19,7 +19,7 @@ package com.github.autermann.wps.streaming.message;
 
 import java.net.URI;
 
-import com.github.autermann.wps.streaming.util.SOAPConstants;
+import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**
  * TODO JavaDoc
@@ -28,9 +28,10 @@ import com.github.autermann.wps.streaming.util.SOAPConstants;
  */
 public class OutputRequestMessage extends Message {
     private boolean includeInputs = false;
+
     @Override
     public URI getSOAPAction() {
-        return SOAPConstants.getRequestOutputActionURI();
+        return SoapConstants.getOutputRequestActionURI();
     }
 
     public boolean isIncludeInputs() {
@@ -40,5 +41,4 @@ public class OutputRequestMessage extends Message {
     public void setIncludeInputs(boolean includeInputs) {
         this.includeInputs = includeInputs;
     }
-
 }

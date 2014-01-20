@@ -15,35 +15,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.message;
+package com.github.autermann.wps.streaming.data;
 
+import java.util.Collections;
+import java.util.List;
 
-import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.util.SoapConstants;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.LinkedListMultimap;
 
 /**
  * TODO JavaDoc
- *
  * @author Christian Autermann
  */
-public class InputMessage extends Message {
+public class ProcessOutputs {
 
-    private ProcessInputs payload;
+    private final LinkedListMultimap<OwsCodeType, ProcessOutput> outputs = LinkedListMultimap.create();
 
-    @Override
-    public URI getSOAPAction() {
-        return SoapConstants.getInputActionURI();
+    public List<ProcessOutput> getOutputs() {
+        return Collections.unmodifiableList(outputs.values());
     }
 
-    public ProcessInputs getPayload() {
-        return this.payload;
+    public List<ProcessOutput> getOutputs(OwsCodeType outputId) {
+        return Collections.unmodifiableList(outputs.get(outputId));
     }
 
-    public void setPayload(ProcessInputs inputs) {
-        this.payload = Preconditions.checkNotNull(inputs);
+    public void addOutput(ProcessOutput output) {
+        this.outputs.put(output.getID(), output);
     }
 
 }

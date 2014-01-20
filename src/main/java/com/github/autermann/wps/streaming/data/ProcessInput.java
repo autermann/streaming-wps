@@ -20,6 +20,7 @@ package com.github.autermann.wps.streaming.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.streaming.message.Message;
+import com.github.autermann.wps.streaming.message.MessageID;
 
 /**
  * TODO JavaDoc
@@ -53,10 +54,10 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
 
     public static class ReferenceInput extends ProcessInput {
         private final OwsCodeType output;
-        private final Message.ID iteration;
+        private final MessageID iteration;
 
         public ReferenceInput(OwsCodeType id, 
-                         Message.ID iteration,
+                         MessageID iteration,
                          OwsCodeType output) {
             super(id);
             this.iteration = checkNotNull(iteration);
@@ -67,7 +68,7 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
             return this.output;
         }
 
-        public Message.ID getReferencedIteration() {
+        public MessageID getReferencedMessage() {
             return this.iteration;
         }
     }
