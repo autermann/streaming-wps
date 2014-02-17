@@ -37,7 +37,7 @@ import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.message.RelationshipType;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
-import com.github.autermann.wps.streaming.util.JobExecutor;
+import com.github.autermann.wps.streaming.util.dependency.JobExecutor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 

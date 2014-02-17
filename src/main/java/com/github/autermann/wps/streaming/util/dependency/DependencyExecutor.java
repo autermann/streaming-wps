@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.util;
+package com.github.autermann.wps.streaming.util.dependency;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,12 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * TODO JavaDoc
@@ -59,7 +58,7 @@ public class DependencyExecutor<K, I, O> {
     private static final Logger log = LoggerFactory
             .getLogger(DependencyExecutor.class);
     private final DirectedAcyclicGraph<K, DefaultEdge> graph
-            = new DirectedAcyclicGraph<K, DefaultEdge>(DefaultEdge.class);
+            = new DirectedAcyclicGraph<>(DefaultEdge.class);
     private final Map<K, Job> jobs = Maps.newHashMap();
     private final ExecutorService executorService;
     private final JobExecutor<I, O> executor;
@@ -74,11 +73,14 @@ public class DependencyExecutor<K, I, O> {
     private final Condition empty = lock.newCondition();
     private volatile boolean shuttingDown = false;
     private volatile boolean complete = true;
+    private final Repository<K, I, O> repository;
 
     public DependencyExecutor(JobExecutor<I, O> jobExecutor,
-                              ExecutorService executorService) {
-        this.executorService = executorService;
-        this.executor = jobExecutor;
+                              ExecutorService executorService,
+                              Repository<K, I, O> repository) {
+        this.executorService = Preconditions.checkNotNull(executorService);
+        this.executor = Preconditions.checkNotNull(jobExecutor);
+        this.repository = Preconditions.checkNotNull(repository);
     }
 
     public void shutdown(boolean complete)
@@ -221,7 +223,8 @@ public class DependencyExecutor<K, I, O> {
         }
     }
 
-    public void setInput(K key, I input) throws NoSuchElementException {
+    public void setInput(K key, I input)
+            throws NoSuchElementException {
         this.lock.lock();
         try {
             Job job = this.jobs.get(key);
@@ -242,13 +245,6 @@ public class DependencyExecutor<K, I, O> {
 
     public JobExecutor<I, O> getExecutor() {
         return executor;
-    }
-
-    private enum State {
-        WAITING,
-        RUNNING,
-        SUCCESS,
-        FAILURE;
     }
 
     private void changeState(State from, State to) {
@@ -295,15 +291,40 @@ public class DependencyExecutor<K, I, O> {
         }
     }
 
+    @Override
+    public String toString() {
+        lock.lock();
+        try {
+            return Objects.toStringHelper(this)
+                    .add("size", this.size)
+                    .add("success", this.success)
+                    .add("failure", this.failure)
+                    .add("waiting", this.waiting)
+                    .add("running", this.running)
+                    .toString();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private enum State {
+        WAITING,
+        RUNNING,
+        SUCCESS,
+        FAILURE;
+    }
+
     private class Job {
         private final K key;
-        private final SettableFuture<I> input = SettableFuture.create();
-        private final SettableFuture<O> output = SettableFuture.create();
-        private ListenableFuture<List<O>> outputs;
+        private final LoadableFuture<I> input;
+        private final LoadableFuture<O> output;
+        private ListenableFuture<List<O>> dependencies;
         private final Lock lock = new ReentrantLock();
         private State state;
 
         Job(K key) {
+            this.output = new Output(key);
+            this.input = new Input(key);
             this.key = checkNotNull(key);
             changeState(State.WAITING);
         }
@@ -348,8 +369,35 @@ public class DependencyExecutor<K, I, O> {
             return this.input;
         }
 
+        public void setInput(I input) {
+            this.lock.lock();
+            try {
+                log.debug("[{}] Received input: {}", this.key, input);
+                checkState(State.WAITING);
+                checkNotNull(input);
+                DependencyExecutor.this.repository.saveInput(this.key, input);
+                this.input.setAvailable();
+                checkForExecution();
+            } finally {
+                this.lock.unlock();
+            }
+        }
+
         public ListenableFuture<O> getOutput() {
             return this.output;
+        }
+
+        private void setOutput(O output) {
+            this.lock.lock();
+            try {
+                log.debug("[{}] Received output: {}", this.key, output);
+                checkNotNull(output);
+                DependencyExecutor.this.repository.saveOutput(key, output);
+                this.output.setAvailable();
+                changeState(State.SUCCESS);
+            } finally {
+                this.lock.unlock();
+            }
         }
 
         public boolean hasInput() {
@@ -360,34 +408,11 @@ public class DependencyExecutor<K, I, O> {
             return this.output.isDone();
         }
 
-        public void setInput(I input) {
-            this.lock.lock();
-            try {
-                log.debug("[{}] Received input: {}", this.key, input);
-                checkState(State.WAITING);
-                this.input.set(checkNotNull(input));
-                checkForExecution();
-            } finally {
-                this.lock.unlock();
-            }
-        }
-
-        private void setOutput(O output) {
-            this.lock.lock();
-            try {
-                log.debug("[{}] Received output: {}", this.key, output);
-                this.output.set(checkNotNull(output));
-                changeState(State.SUCCESS);
-            } finally {
-                this.lock.unlock();
-            }
-        }
-
         private void setOutputFailure(Throwable t) {
             this.lock.lock();
             try {
                 log.debug("[" + this.key + "] Output failed", t);
-                this.output.setException(t);
+                this.output.setFailure(t);
                 changeState(State.FAILURE);
             } finally {
                 this.lock.unlock();
@@ -400,25 +425,25 @@ public class DependencyExecutor<K, I, O> {
                 checkState(State.WAITING);
                 List<ListenableFuture<O>> outputs = Lists.newLinkedList();
                 for (Job job : dependencies) {
-                    log.debug("[{}] Dependency added: {}",
-                              this.key, job.getKey());
+                    log.debug("[{}] Dependency added: {}", this.key, job
+                            .getKey());
                     outputs.add(job.getOutput());
                 }
-                this.outputs = Futures.allAsList(outputs);
+                this.dependencies = Futures.allAsList(outputs);
                 Futures
-                        .addCallback(this.outputs, new FutureCallback<List<O>>() {
+                        .addCallback(this.dependencies, new FutureCallback<List<O>>() {
 
                             @Override
                             public void onSuccess(List<O> result) {
-                                log.debug("[{}] Received dependencies: {}",
-                                          key, result);
+                                log
+                                .debug("[{}] Received dependencies: {}", key, result);
                                 checkForExecution();
                             }
 
                             @Override
                             public void onFailure(Throwable throwable) {
-                                log.debug("[" + key + "] Failed dependencies",
-                                          throwable);
+                                log
+                                .debug("[" + key + "] Failed dependencies", throwable);
                                 setOutputFailure(throwable);
                             }
                         });
@@ -431,7 +456,7 @@ public class DependencyExecutor<K, I, O> {
             lock.lock();
             try {
                 if (this.input.isDone() &&
-                    (this.outputs == null || this.outputs.isDone()) &&
+                    (this.dependencies == null || this.dependencies.isDone()) &&
                     this.state == State.WAITING) {
                     changeState(State.RUNNING);
                     log.debug("[{}] Scheduling for execution", key);
@@ -439,15 +464,12 @@ public class DependencyExecutor<K, I, O> {
                     final Iterable<O> out;
                     try {
                         in = this.input.get();
-                        if (this.outputs != null) {
-                            out = this.outputs.get();
+                        if (this.dependencies != null) {
+                            out = this.dependencies.get();
                         } else {
                             out = Collections.emptyList();
                         }
-                    } catch (InterruptedException ex) {
-                        setOutputFailure(ex);
-                        return;
-                    } catch (ExecutionException ex) {
+                    } catch (InterruptedException | ExecutionException ex) {
                         setOutputFailure(ex);
                         return;
                     }
@@ -489,158 +511,32 @@ public class DependencyExecutor<K, I, O> {
                 }
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        lock.lock();
-        try {
-            return Objects.toStringHelper(this)
-                    .add("size", this.size)
-                    .add("success", this.success)
-                    .add("failure", this.failure)
-                    .add("waiting", this.waiting)
-                    .add("running", this.running)
-                    .toString();
-        } finally {
-            lock.unlock();
-        }
-    }
+        private class Input extends LoadableFuture<I> {
+            private final K key;
 
-    public static void main(String[] args) throws CyclicDependencyException,
-                                                  InterruptedException,
-                                                  MissingInputException {
-        final DependencyExecutor<String, Input, Output> exec
-                = new DependencyExecutor<String, Input, Output>(new Exec(), Executors
-                        .newFixedThreadPool(5));
-        Thread t
-                = new Thread() {
-
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                            log.debug("{}", exec);
-                        }
-                    }
-
-                };
-        t.setDaemon(true);
-        t.start();
-        exec.addJob("1", "3", "4");
-        exec.addJob("2", "4", "5");
-        exec.addJob("3", "5", "6");
-        exec.addJob("4", "6", "7");
-        exec.addJob("5", "7", "8");
-        exec.addJob("6", "8", "9");
-        exec.addJob("7", "9", "10");
-        exec.addJob("8", "10", "11");
-        exec.addJob("9", "11", "12");
-        exec.addJob("11");
-        exec.addJob("12");
-        for (int i = 1; i <= 12; ++i) {
-            exec.setInput(String.valueOf(i), new Input(i));
-        }
-        exec.shutdown(true);
-        log.info("{}", exec);
-    }
-
-    private static class Input {
-        private final int value;
-
-        public Input(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 47 * hash + this.value;
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
+            Input(K key) {
+                this.key = key;
             }
-            if (getClass() != obj.getClass()) {
-                return false;
+
+            @Override
+            protected I load() {
+                return DependencyExecutor.this.repository.loadInput(key);
             }
-            final Input other = (Input) obj;
-            if (this.value != other.value) {
-                return false;
+        }
+
+        private class Output extends LoadableFuture<O> {
+            private final K key;
+
+            Output(K key) {
+                this.key = key;
             }
-            return true;
-        }
 
-        @Override
-        public String toString() {
-            return "Input{" + "value=" + value + '}';
-        }
-    }
-
-    private static class Output {
-        private final int value;
-
-        public Output(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 97 * hash + this.value;
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Output other = (Output) obj;
-            if (this.value != other.value) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "Output{" + "value=" + value + '}';
-        }
-    }
-
-    private static class Exec implements JobExecutor<Input, Output> {
-
-        @Override
-        public Output execute(Input value, Iterable<Output> dependencies) {
-            try {
-                Thread.sleep(500);
-                int val = value.getValue();
-                for (Output out : dependencies) {
-                    val += out.getValue();
-                }
-                return new Output(val);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+            @Override
+            protected O load() {
+                return DependencyExecutor.this.repository.loadOutput(key);
             }
         }
     }
+
 }
