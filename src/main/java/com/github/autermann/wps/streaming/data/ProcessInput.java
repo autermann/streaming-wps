@@ -19,7 +19,8 @@ package com.github.autermann.wps.streaming.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.github.autermann.wps.streaming.message.Message;
+import com.github.autermann.wps.commons.Identifiable;
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.message.MessageID;
 
 /**
@@ -56,9 +57,9 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
         private final OwsCodeType output;
         private final MessageID iteration;
 
-        public ReferenceInput(OwsCodeType id, 
-                         MessageID iteration,
-                         OwsCodeType output) {
+        public ReferenceInput(OwsCodeType id,
+                              MessageID iteration,
+                              OwsCodeType output) {
             super(id);
             this.iteration = checkNotNull(iteration);
             this.output = checkNotNull(output);
@@ -70,13 +71,6 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
 
         public MessageID getReferencedMessage() {
             return this.iteration;
-        }
-    }
-
-    public static class Static extends DataInput {
-
-        public Static(OwsCodeType id, Data data) {
-            super(id, data);
         }
     }
 }

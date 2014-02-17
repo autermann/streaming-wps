@@ -46,48 +46,44 @@ public abstract class AbstractParser implements IParser {
 
     @Override
     public boolean isSupportedSchema(String schema) {
-        return this.format.getSchema().equals(schema);
+        return this.format.hasSchema(schema);
     }
 
     @Override
     public boolean isSupportedFormat(String format) {
-        return this.format.getMimeType().equals(format);
+        return this.format.hasMimeType(format);
     }
 
     @Override
     public boolean isSupportedEncoding(String encoding) {
-        return this.format.getEncoding().equals(encoding);
+        return this.format.hasEncoding(encoding);
     }
 
     @Override
     public String[] getSupportedSchemas() {
         return this.format.getSchema().isPresent()
                ? new String[] { this.format.getSchema().get() }
-               : new String[] {};
+               : new String[0];
     }
 
     @Override
     public String[] getSupportedEncodings() {
         return this.format.getEncoding().isPresent()
                ? new String[] { this.format.getEncoding().get() }
-               : new String[] {};
+               : new String[0];
     }
 
     @Override
     public String[] getSupportedFormats() {
-        return new String[] { this.format.getMimeType() };
+        return this.format.getMimeType().isPresent()
+               ? new String[] { this.format.getMimeType().get() }
+               : new String[0];
     }
 
     @Override
     public FormatDocument.Format[] getSupportedFullFormats() {
         FormatDocument.Format f = FormatDocument.Format.Factory.newInstance();
-        f.setMimetype(this.format.getMimeType());
-        if (this.format.getEncoding().isPresent()) {
-            f.setEncoding(this.format.getEncoding().get());
-        }
-        if (this.format.getSchema().isPresent()) {
-            f.setSchema(this.format.getSchema().get());
-        }
+        this.format.encodeTo(f);
         return new FormatDocument.Format[] { f };
     }
 

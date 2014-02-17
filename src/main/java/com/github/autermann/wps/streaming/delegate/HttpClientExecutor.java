@@ -31,7 +31,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import com.github.autermann.wps.streaming.data.OwsCodeType;
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.google.common.base.Preconditions;
 
@@ -55,11 +55,9 @@ public class HttpClientExecutor extends DelegatingExecutor {
     }
 
     private CloseableHttpClient createHttpClient() {
-        PoolingHttpClientConnectionManager cm
-                = new PoolingHttpClientConnectionManager();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(100);
-        return HttpClients.custom().
-                setConnectionManager(cm).build();
+        return HttpClients.custom().setConnectionManager(cm).build();
     }
 
     @Override
@@ -68,8 +66,7 @@ public class HttpClientExecutor extends DelegatingExecutor {
         httpRequest.setEntity(EntityBuilder.create()
                 .setContentType(CONTENT_TYPE)
                 .setStream(request.newInputStream()).build());
-        CloseableHttpResponse httpResponse = null;
-        httpResponse = client.execute(httpRequest);
+        CloseableHttpResponse httpResponse = client.execute(httpRequest);
         return httpResponse.getEntity().getContent();
     }
 

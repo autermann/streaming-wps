@@ -29,8 +29,8 @@ import com.github.autermann.wps.streaming.message.RelationshipType;
  * @author Christian Autermann
  */
 public class StreamingError extends ExceptionReport {
-
     public static final String UNRESOLVABLE_INPUT = "UnresolvableInput";
+    private static final long serialVersionUID = -7876931918796740783L;
 
     public StreamingError(String message, String errorKey) {
         super(message, errorKey);
@@ -50,11 +50,12 @@ public class StreamingError extends ExceptionReport {
     }
 
     public String getErrorKey() {
-        return errorKey;
+        return super.errorKey;
     }
 
+    @Override
     public String getLocator() {
-        return locator;
+        return super.locator;
     }
 
     public ErrorMessage toMessage(Message cause) {

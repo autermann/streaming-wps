@@ -17,7 +17,10 @@
  */
 package com.github.autermann.wps.streaming.data;
 
+import com.github.autermann.wps.commons.Identifiable;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.github.autermann.wps.commons.description.OwsCodeType;
 
 
 /**

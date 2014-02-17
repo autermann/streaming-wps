@@ -19,13 +19,12 @@ package com.github.autermann.wps.streaming.message.xml;
 
 import java.net.URI;
 
-import net.opengis.ows.x11.CodeType;
 import net.opengis.wps.x100.InputType;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
-import com.github.autermann.wps.streaming.data.OwsCodeType;
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.ReferenceInput;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
@@ -67,8 +66,6 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
                 sm.addRelatedMessageID(RelationshipType.Needs, messageId);
             } else if (in instanceof ProcessInput.DataInput) {
                 getCommonEncoding().encodeInput(inputs.addNewStreamingInput(), (ProcessInput.DataInput) in);
-            } else if (in instanceof ProcessInput.Static) {
-                throw new IllegalArgumentException("Static inputs are not supported for InputMessages");
             }
         }
         return doc;
@@ -76,19 +73,13 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
 
     private MessageID encodeReferenceInput(ReferenceInputType xbReferenceInput,
                                            ProcessInput.ReferenceInput referenceInput) {
-        CodeType xbInputId = xbReferenceInput.addNewIdentifier();
-        getCommonEncoding().encodeCodeType(xbInputId, referenceInput.getID());
+        referenceInput.getID().encodeTo(xbReferenceInput.addNewIdentifier());
         Reference xbReference = xbReferenceInput.addNewReference();
         MessageID referenced = referenceInput.getReferencedMessage();
-        xbReference.addNewMessageID().setStringValue(
-                referenced.toString());
-        CodeType xbOutput = xbReference.addNewOutput();
-        getCommonEncoding().encodeCodeType(xbOutput, referenceInput
-                .getReferencedOutput());
+        xbReference.addNewMessageID().setStringValue(referenced.toString());
+        referenceInput.getReferencedOutput().encodeTo(xbReference.addNewOutput());
         return referenced;
     }
-
-   
 
     @Override
     protected InputMessage create() {
@@ -126,11 +117,9 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
     private ProcessInput decodeReferenceInput(
             ReferenceInputType xbReferenceInput) throws XmlException {
         Reference ref = xbReferenceInput.getReference();
-        OwsCodeType inputID = getCommonEncoding()
-                .decodeCodeType(xbReferenceInput.getIdentifier());
+        OwsCodeType inputID = OwsCodeType.of(xbReferenceInput.getIdentifier());
         Optional<MessageID> messageID = decodeMessageID(ref.getMessageID());
-        OwsCodeType outputID = getCommonEncoding().decodeCodeType(ref
-                .getOutput());
+        OwsCodeType outputID = OwsCodeType.of(ref.getOutput());
         if (!messageID.isPresent()) {
             throw new XmlException("Missing wsa:MessageID");
         }

@@ -18,7 +18,6 @@
 package com.github.autermann.wps.streaming.message.xml;
 
 import net.opengis.ows.x11.BoundingBoxType;
-import net.opengis.ows.x11.CodeType;
 import net.opengis.wps.x100.ComplexDataType;
 import net.opengis.wps.x100.DataType;
 import net.opengis.wps.x100.InputType;
@@ -29,11 +28,12 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlString;
 
+import com.github.autermann.wps.commons.Format;
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
 import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.Data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data.ReferencedData;
-import com.github.autermann.wps.streaming.data.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
 import com.github.autermann.wps.streaming.data.ProcessOutput;
@@ -54,13 +54,12 @@ public class CommonEncoding {
         } else {
             encodeData(xbStreamingInput.addNewData(), data);
         }
-        encodeCodeType(xbStreamingInput.addNewIdentifier(),
-                       streamingInput.getID());
+        streamingInput.getID().encodeTo(xbStreamingInput.addNewIdentifier());
     }
 
     public ProcessInput decodeInput(InputType xbStreamingInput)
             throws XmlException {
-        OwsCodeType id = decodeCodeType(xbStreamingInput.getIdentifier());
+        OwsCodeType id = OwsCodeType.of(xbStreamingInput.getIdentifier());
         final Data data;
         if (xbStreamingInput.getReference() != null) {
             data = new Data.ReferencedData(xbStreamingInput.getReference());
@@ -81,34 +80,13 @@ public class CommonEncoding {
         } else if (xbData.getComplexData() != null) {
             ComplexDataType xbComplexData = xbData.getComplexData();
             String content = xbComplexData.xmlText();
-            content = content.substring(content.indexOf('>') + 1,
-                                        content.lastIndexOf("</"));
-            return new Data.ComplexData(xbComplexData.getMimeType(),
-                                        xbComplexData.getEncoding(),
-                                        xbComplexData.getSchema(),
-                                        content);
+            content = content.substring(content.indexOf('>') + 1, content.lastIndexOf("</"));
+            return new Data.ComplexData(Format.of(xbComplexData), content);
         } else if (xbData.getBoundingBoxData() != null) {
             BoundingBoxType xbBoundingBoxData = xbData.getBoundingBoxData();
             return new Data.BoundingBoxData(xbBoundingBoxData);
         } else {
             throw new XmlException("Missing wps:LiteralData or wps:ComplexData or wps:BoundingBoxData");
-        }
-    }
-
-    public OwsCodeType decodeCodeType(CodeType codeType)
-            throws XmlException {
-        if (codeType == null) {
-            throw new XmlException("Expected ows:CodeType");
-        }
-        String codeSpace = codeType.getCodeSpace();
-        String value = codeType.getStringValue();
-        return new OwsCodeType(codeSpace, value);
-    }
-
-    public void encodeCodeType(CodeType xbCodeType, OwsCodeType codeType) {
-        xbCodeType.setStringValue(codeType.getValue());
-        if (codeType.getCodeSpace().isPresent()) {
-            xbCodeType.setCodeSpace(codeType.getCodeSpace().get());
         }
     }
 
@@ -141,13 +119,7 @@ public class CommonEncoding {
             throws XmlException {
         ComplexDataType xbComplexData = xbData.addNewComplexData();
         xbComplexData.set(asXmlObject(complexData));
-        xbComplexData.setMimeType(complexData.getMimeType());
-        if (complexData.getEncoding().isPresent()) {
-            xbComplexData.setEncoding(complexData.getEncoding().get());
-        }
-        if (complexData.getSchema().isPresent()) {
-            xbComplexData.setSchema(complexData.getSchema().get());
-        }
+        complexData.getFormat().encodeTo(xbComplexData);
     }
 
     private XmlObject asXmlObject(ComplexData complexData) {
@@ -163,12 +135,12 @@ public class CommonEncoding {
     public void encodeOutput(OutputDataType xbOutput, ProcessOutput output)
             throws XmlException {
         encodeData(xbOutput.addNewData(), output.getData());
-        encodeCodeType(xbOutput.addNewIdentifier(), output.getID());
+        output.getID().encodeTo(xbOutput.addNewIdentifier());
     }
 
     public ProcessOutput decodeOutput(OutputDataType xbOutput)
             throws XmlException {
-        OwsCodeType id = decodeCodeType(xbOutput.getIdentifier());
+        OwsCodeType id = OwsCodeType.of(xbOutput.getIdentifier());
         Data data = decodeData(xbOutput.getData());
         return new ProcessOutput(id, data);
     }

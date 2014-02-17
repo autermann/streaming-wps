@@ -17,8 +17,6 @@
  */
 package com.github.autermann.wps.streaming.message.xml;
 
-import com.github.autermann.wps.streaming.message.xml.MessageEncoding;
-import com.github.autermann.wps.streaming.message.xml.OutputMessageEncoding;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -27,11 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.Data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data.LiteralData;
-import com.github.autermann.wps.streaming.data.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessOutput;
 import com.github.autermann.wps.streaming.data.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.OutputMessage;

@@ -27,13 +27,15 @@ import net.opengis.wps.x100.ExecuteDocument;
 import net.opengis.wps.x100.ExecuteDocument.Execute;
 import net.opengis.wps.x100.ExecuteResponseDocument;
 import net.opengis.wps.x100.OutputDataType;
+import net.opengis.wps.x100.ResponseFormType;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
+
 import org.n52.wps.server.ExceptionReport;
 
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
-import com.github.autermann.wps.streaming.data.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
@@ -72,10 +74,7 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             return outputs;
         } catch (StreamingError ex) {
             throw ex; // do not wrap streaming errors
-        } catch (ExceptionReport ex) {
-            throw new StreamingError("Delegated process failed",
-                                     StreamingError.REMOTE_COMPUTATION_ERROR, ex);
-        } catch (IOException ex) {
+        } catch (ExceptionReport | IOException ex) {
             throw new StreamingError("Delegated process failed",
                                      StreamingError.REMOTE_COMPUTATION_ERROR, ex);
         }
@@ -118,10 +117,8 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
                 .getExceptionArray()) {
             String code = xbException.getExceptionCode();
             if (code == null ||
-                code
-                    .equals(ErrorMessageEncoding.JAVA_ROOT_CAUSE_EXCEPTION_CODE) ||
-                code
-                    .equals(ErrorMessageEncoding.JAVA_STACK_TRACE_EXCEPTION_CODE)) {
+                code.equals(ErrorMessageEncoding.JAVA_ROOT_CAUSE_EXCEPTION_CODE) ||
+                code.equals(ErrorMessageEncoding.JAVA_STACK_TRACE_EXCEPTION_CODE)) {
                 continue;
             }
             String locator = xbException.getLocator();
@@ -142,12 +139,13 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             Execute execute = document.addNewExecute();
             execute.setService(WPS_SERVICE_TYPE);
             execute.setVersion(WPS_SERVICE_VERSION);
-            encoding.encodeCodeType(execute.addNewIdentifier(), processId);
+            processId.encodeTo(execute.addNewIdentifier());
             DataInputsType xbDataInputs = execute.addNewDataInputs();
             for (ProcessInput input : inputs.getInputs()) {
                 encoding.encodeInput(xbDataInputs.addNewInput(),
                                      (DataInput) input);
             }
+            ResponseFormType responseForm = execute.addNewResponseForm();
             return document;
         } catch (XmlException ex) {
             throw new StreamingError("Could not encode execute request",

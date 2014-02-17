@@ -17,14 +17,14 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
+import com.github.autermann.wps.commons.description.ProcessDescription;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
 
-
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
 import com.github.autermann.wps.streaming.ProcessConfiguration;
-import com.github.autermann.wps.streaming.data.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 

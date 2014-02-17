@@ -41,7 +41,7 @@ public class StaticInputBinding implements IComplexData {
     }
 
     @Override
-    public Class<?> getSupportedClass() {
+    public Class<ProcessInputs> getSupportedClass() {
         return ProcessInputs.class;
     }
 

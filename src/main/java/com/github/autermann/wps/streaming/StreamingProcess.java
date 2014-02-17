@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.autermann.wps.streaming.data.Identifiable;
+import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;

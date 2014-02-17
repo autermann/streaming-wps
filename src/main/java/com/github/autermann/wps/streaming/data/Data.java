@@ -17,13 +17,13 @@
  */
 package com.github.autermann.wps.streaming.data;
 
-import com.github.autermann.wps.commons.Format;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 
 import net.opengis.ows.x11.BoundingBoxType;
 import net.opengis.wps.x100.InputReferenceType;
 
+import com.github.autermann.wps.commons.Format;
 import com.google.common.base.Optional;
 
 /**
@@ -93,34 +93,9 @@ public abstract class Data {
         private final Format format;
         private final String content;
 
-        public ComplexData(String mimeType, String content) {
-            this(new Format(mimeType), content);
-        }
-
-        public ComplexData(String mimeType, String encoding, String content) {
-            this(new Format(mimeType, encoding), content);
-        }
-
-        public ComplexData(String mimeType, String encoding,
-                           String schema, String content) {
-            this(new Format(mimeType, encoding, schema), content);
-        }
-
         public ComplexData(Format format, String content) {
             this.format = checkNotNull(format);
             this.content = checkNotNull(content);
-        }
-
-        public String getMimeType() {
-            return this.format.getMimeType();
-        }
-
-        public Optional<String> getEncoding() {
-            return this.format.getEncoding();
-        }
-
-        public Optional<String> getSchema() {
-            return this.format.getSchema();
         }
 
         public String getContent() {

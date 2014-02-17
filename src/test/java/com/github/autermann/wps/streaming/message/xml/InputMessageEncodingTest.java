@@ -29,12 +29,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.Data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data.LiteralData;
 import com.github.autermann.wps.streaming.data.Data.ReferencedData;
-import com.github.autermann.wps.streaming.data.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.ReferenceInput;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
@@ -92,6 +92,6 @@ public class InputMessageEncodingTest {
                 .parse("<wps:Reference xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" schema=\"http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\" xlink:href=\"http://geoprocessing.demo.52north.org:8080/geoserver/wfs?SERVICE=WFS&amp;VERSION=1.0.0&amp;REQUEST=GetFeature&amp;TYPENAME=topp:tasmania_roads&amp;SRS=EPSG:4326&amp;OUTPUTFORMAT=GML3\" method=\"GET\"/>");
     }
 
-    
+
 
 }

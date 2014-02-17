@@ -17,6 +17,7 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
+import com.github.autermann.wps.commons.description.ProcessDescription;
 import java.net.URI;
 
 import org.n52.wps.algorithm.annotation.Algorithm;

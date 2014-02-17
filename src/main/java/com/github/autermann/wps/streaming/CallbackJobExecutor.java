@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.autermann.wps.streaming.data.OwsCodeType;
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.ProcessInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.ReferenceInput;

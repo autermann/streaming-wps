@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 import java.util.Set;
 
-import com.github.autermann.wps.streaming.data.Identifiable;
+import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.streaming.util.WSAConstants;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.google.common.collect.LinkedListMultimap;
 
 /**

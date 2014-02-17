@@ -20,7 +20,6 @@ package com.github.autermann.wps.streaming.message.xml;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
