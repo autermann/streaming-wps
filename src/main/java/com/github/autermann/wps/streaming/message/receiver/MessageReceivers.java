@@ -17,16 +17,131 @@
  */
 package com.github.autermann.wps.streaming.message.receiver;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.autermann.wps.streaming.message.ErrorMessage;
+import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.Message;
+import com.github.autermann.wps.streaming.message.OutputMessage;
+import com.github.autermann.wps.streaming.message.OutputRequestMessage;
+import com.github.autermann.wps.streaming.message.StopMessage;
+import com.google.common.base.Preconditions;
 
 public final class MessageReceivers {
 
     private static final MessageReceiver NULL = new MessageReceiver() {
-        @Override public void receive(Message message) {}
+        @Override
+        public void receive(Message message) {
+        }
     };
 
     public static MessageReceiver nullReceiver() {
         return NULL;
+    }
+
+    public static MessageReceiver onlyIncomingMessages(MessageReceiver delegate) {
+        return new IncomingMessageFilter(delegate);
+    }
+
+    public static MessageReceiver onlyOutgoingMessages(MessageReceiver delegate) {
+        return new OutgoingMessageFilter(delegate);
+    }
+
+    public static MessageReceiver split(MessageReceiver in, MessageReceiver out) {
+        return new SplittingMessageReceiver(in, out);
+    }
+
+    private static class IncomingMessageFilter extends IncomingMessageReceiver {
+
+        private static final Logger log = LoggerFactory
+                .getLogger(IncomingMessageFilter.class);
+        private final MessageReceiver delegate;
+
+        IncomingMessageFilter(MessageReceiver delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        protected void receiveStop(StopMessage message) {
+            log.debug("Receiving stop message {}", message);
+            this.delegate.receive(message);
+        }
+
+        @Override
+        protected void receiveInput(InputMessage message) {
+            log.debug("Receiving input message {}", message);
+            this.delegate.receive(message);
+        }
+
+        @Override
+        protected void receiveOutputRequest(OutputRequestMessage message) {
+            log.debug("Receiving output request message {}", message);
+            this.delegate.receive(message);
+        }
+
+    }
+
+    private static class OutgoingMessageFilter extends OutgoingMessageReceiver {
+
+        private static final Logger log = LoggerFactory
+                .getLogger(OutgoingMessageFilter.class);
+        private final MessageReceiver delegate;
+
+        OutgoingMessageFilter(MessageReceiver delegate) {
+            this.delegate = checkNotNull(delegate);
+        }
+
+        @Override
+        protected void receiveError(ErrorMessage message) {
+            log.debug("Receiving error message {}", message);
+            this.delegate.receive(message);
+        }
+
+        @Override
+        protected void receiveOutput(OutputMessage message) {
+            log.debug("Receiving output message {}", message);
+            this.delegate.receive(message);
+        }
+
+    }
+
+    private static class SplittingMessageReceiver extends AbstractMessageReceiver {
+        private final MessageReceiver outgoing;
+        private final MessageReceiver incoming;
+
+        SplittingMessageReceiver(MessageReceiver incoming,
+                                 MessageReceiver outgoing) {
+            this.outgoing = Preconditions.checkNotNull(outgoing);
+            this.incoming = Preconditions.checkNotNull(incoming);
+        }
+
+        @Override
+        protected void receiveError(ErrorMessage message) {
+            outgoing.receive(message);
+        }
+
+        @Override
+        protected void receiveOutputRequest(OutputRequestMessage message) {
+            incoming.receive(message);
+        }
+
+        @Override
+        protected void receiveStop(StopMessage message) {
+            incoming.receive(message);
+        }
+
+        @Override
+        protected void receiveInput(InputMessage message) {
+            incoming.receive(message);
+        }
+
+        @Override
+        protected void receiveOutput(OutputMessage message) {
+            outgoing.receive(message);
+        }
     }
 
 }

@@ -40,6 +40,7 @@ public class MessageBroker implements MessageReceiver{
 
     public void addProcess(ProcessConfiguration configuration) {
         StreamingProcess process = new StreamingProcess(configuration);
+        log.debug("Created process {}", process.getID());
         this.processes.put(process.getID(), process);
     }
 
@@ -48,7 +49,8 @@ public class MessageBroker implements MessageReceiver{
     }
 
     @Override
-    public void receive(Message message) throws UnsupportedMessageTypeException {
+    public void receive(Message message) {
+        log.debug("Receiving message: {}", message);
         try {
             receive1(message);
         } catch (StreamingError ex) {
@@ -63,7 +65,7 @@ public class MessageBroker implements MessageReceiver{
                                      StreamingError.INVALID_PARAMETER_VALUE);
         }
         try {
-            process.receive(message);
+            process.getInput().receive(message);
         } catch (UnsupportedMessageTypeException e) {
             throw new StreamingError("Unsupported Message",
                                      StreamingError.OPERATION_NOT_SUPPORTED, e);

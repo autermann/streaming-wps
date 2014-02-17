@@ -17,7 +17,16 @@
  */
 package com.github.autermann.wps.streaming;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
+import com.github.autermann.wps.streaming.message.InputMessage;
+import com.github.autermann.wps.streaming.message.MessageID;
+import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
+import com.github.autermann.wps.streaming.util.dependency.InMemoryRepository;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * TODO JavaDoc
@@ -25,7 +34,7 @@ import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
  * @author Christian Autermann
  */
 public abstract class ProcessConfiguration {
-
+    protected static final int THREADS = 10;
     private final StreamingProcessID processId = StreamingProcessID.create();
 
     public StreamingProcessID getProcessID() {
@@ -33,4 +42,20 @@ public abstract class ProcessConfiguration {
     }
 
     public abstract CallbackJobExecutor createExecutor(MessageReceiver callback);
+
+    public ExecutorService createThreadPool() {
+        String nameFormat = "streaming-process-" + getProcessID() + "-%d";
+        ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                .setNameFormat(nameFormat).build();
+        return Executors.newFixedThreadPool(THREADS, threadFactory);
+    }
+
+    public MessageRepository createMessageRepository() {
+        return new DefaultMessageRepository();
+    }
+
+    private static class DefaultMessageRepository
+            extends InMemoryRepository<MessageID, InputMessage, OutputMessage>
+            implements MessageRepository {
+    }
 }

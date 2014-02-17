@@ -51,8 +51,7 @@ public class StaticInputParser extends AbstractParser {
     @Override
     protected StaticInputBinding parse(InputStream input) throws IOException {
         try {
-            StaticInputsDocument document = StaticInputsDocument.Factory
-                    .parse(input);
+            StaticInputsDocument document = StaticInputsDocument.Factory.parse(input);
             DataInputsType xbStaticInputs = document.getStaticInputs();
             ProcessInputs staticInputs = new ProcessInputs();
             for (InputType xbInput : xbStaticInputs.getInputArray()) {

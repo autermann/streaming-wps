@@ -73,7 +73,8 @@ public class StreamingSocketEndpoint implements MessageReceiver {
     @OnError
     public void onError(Throwable cause) {
         log.info("Client session " + session.getId() + " errored", cause);
-        StreamingError error = new StreamingError("Error while processing message", StreamingError.NO_APPLICABLE_CODE, cause);
+        StreamingError error = new StreamingError("Error while processing message",
+                StreamingError.NO_APPLICABLE_CODE, cause);
         ErrorMessage message = new ErrorMessage();
         message.setPayload(error);
         receive(message);
@@ -86,9 +87,7 @@ public class StreamingSocketEndpoint implements MessageReceiver {
                 log.info("Receiving server message: {}", message);
                 session.getBasicRemote().sendObject(message);
             }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } catch (EncodeException ex) {
+        } catch (IOException | EncodeException ex) {
             throw new RuntimeException(ex);
         }
     }
