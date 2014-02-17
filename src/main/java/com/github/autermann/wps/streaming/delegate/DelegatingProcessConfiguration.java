@@ -17,12 +17,11 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
-import com.github.autermann.wps.commons.description.ProcessDescription;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
 import com.github.autermann.wps.streaming.ProcessConfiguration;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
@@ -35,7 +34,6 @@ import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
  */
 public class DelegatingProcessConfiguration extends ProcessConfiguration {
     private URI remoteURL;
-    private OwsCodeType remoteProcessIdentifier;
     private ProcessInputs staticInputs = new ProcessInputs();
     private ProcessDescription processDescription;
 
@@ -65,9 +63,7 @@ public class DelegatingProcessConfiguration extends ProcessConfiguration {
 
     @Override
     public CallbackJobExecutor createExecutor(MessageReceiver callback) {
-        return new HttpClientExecutor(callback,
-                                      this.remoteProcessIdentifier,
-                                      this.remoteURL);
+        return new HttpClientExecutor(callback, this);
     }
 
 }

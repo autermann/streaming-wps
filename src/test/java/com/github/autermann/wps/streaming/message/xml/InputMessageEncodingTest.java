@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
+import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
@@ -77,7 +78,7 @@ public class InputMessageEncodingTest {
         StreamingProcessID processId = StreamingProcessID.create();
         MessageID ref = MessageID.create();
         inputs.addInput(new DataInput(new OwsCodeType("input1"), new LiteralData("xs:string", "input1")));
-        inputs.addInput(new DataInput(new OwsCodeType("input2"), new ComplexData("text/csv", "UTF-8", "<hello>w</hello>")));
+        inputs.addInput(new DataInput(new OwsCodeType("input2"), new ComplexData(new Format("text/csv", "UTF-8"), "<hello>w</hello>")));
         inputs.addInput(new ReferenceInput(new OwsCodeType("input3"), ref, new OwsCodeType("output1")));
         inputs.addInput(new DataInput(new OwsCodeType("input4"), new ReferencedData(createInputReference())));
         inputs.addInput(new DataInput(new OwsCodeType("input5"), new BoundingBoxData(createBoundingBox())));

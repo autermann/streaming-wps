@@ -17,16 +17,20 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import net.opengis.ows.x11.ExceptionReportDocument;
 import net.opengis.ows.x11.ExceptionType;
 import net.opengis.wps.x100.DataInputsType;
+import net.opengis.wps.x100.DocumentOutputDefinitionType;
 import net.opengis.wps.x100.ExecuteDocument;
 import net.opengis.wps.x100.ExecuteDocument.Execute;
 import net.opengis.wps.x100.ExecuteResponseDocument;
 import net.opengis.wps.x100.OutputDataType;
+import net.opengis.wps.x100.ResponseDocumentType;
 import net.opengis.wps.x100.ResponseFormType;
 
 import org.apache.xmlbeans.XmlException;
@@ -35,6 +39,8 @@ import org.apache.xmlbeans.XmlObject;
 import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ProcessDescription;
+import com.github.autermann.wps.commons.description.ProcessOutputDescription;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
 import com.github.autermann.wps.streaming.data.ProcessInput;
 import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
@@ -44,7 +50,6 @@ import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
-import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 
 /**
@@ -55,13 +60,13 @@ import com.google.common.io.Closeables;
 public abstract class DelegatingExecutor extends CallbackJobExecutor {
     private static final String WPS_SERVICE_VERSION = "1.0.0";
     private static final String WPS_SERVICE_TYPE = "WPS";
-    private final OwsCodeType processId;
+    private final ProcessDescription description;
     private final CommonEncoding encoding = new CommonEncoding();
 
     public DelegatingExecutor(MessageReceiver callback,
-                              OwsCodeType processId) {
+                              DelegatingProcessConfiguration configuration) {
         super(callback);
-        this.processId = Preconditions.checkNotNull(processId);
+        this.description = checkNotNull(configuration.getProcessDescription());
     }
 
     @Override
@@ -139,13 +144,36 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             Execute execute = document.addNewExecute();
             execute.setService(WPS_SERVICE_TYPE);
             execute.setVersion(WPS_SERVICE_VERSION);
-            processId.encodeTo(execute.addNewIdentifier());
+            description.getID().encodeTo(execute.addNewIdentifier());
             DataInputsType xbDataInputs = execute.addNewDataInputs();
             for (ProcessInput input : inputs.getInputs()) {
-                encoding.encodeInput(xbDataInputs.addNewInput(),
-                                     (DataInput) input);
+                //TODO verify inputs...
+                encoding.encodeInput(xbDataInputs.addNewInput(), (DataInput) input);
             }
             ResponseFormType responseForm = execute.addNewResponseForm();
+            ResponseDocumentType responseDocument = responseForm.addNewResponseDocument();
+            for (OwsCodeType id : description.getOutputs()) {
+                ProcessOutputDescription output = description.getOutput(id);
+                DocumentOutputDefinitionType xbOutput = responseDocument.addNewOutput();
+                output.getID().encodeTo(xbOutput.addNewIdentifier());
+                xbOutput.setAsReference(false);
+
+                if (output.isComplex()) {
+                    if (description.isStoreSupported()) {
+                        xbOutput.setAsReference(true);
+                    }
+                    output.asComplex().getDefaultFormat().encodeTo(xbOutput);
+                } else if (output.isBoundingBox()) {
+                    if (output.asBoundingBox().getDefaultCRS().isPresent()) {
+                        xbOutput.setUom(output.asBoundingBox().getDefaultCRS().get());
+                    }
+                } else if (output.isLiteral()) {
+                    if (output.asLiteral().getDefaultUOM().isPresent()) {
+                        xbOutput.setUom(output.asLiteral().getDefaultUOM().get().getValue());
+                    }
+                }
+            }
+
             return document;
         } catch (XmlException ex) {
             throw new StreamingError("Could not encode execute request",

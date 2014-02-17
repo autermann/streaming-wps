@@ -25,11 +25,13 @@ import com.google.common.collect.LinkedListMultimap;
 
 /**
  * TODO JavaDoc
+ *
  * @author Christian Autermann
  */
 public class ProcessOutputs {
 
-    private final LinkedListMultimap<OwsCodeType, ProcessOutput> outputs = LinkedListMultimap.create();
+    private final LinkedListMultimap<OwsCodeType, ProcessOutput> outputs
+            = LinkedListMultimap.create();
 
     public List<ProcessOutput> getOutputs() {
         return Collections.unmodifiableList(outputs.values());
@@ -41,6 +43,14 @@ public class ProcessOutputs {
 
     public void addOutput(ProcessOutput output) {
         this.outputs.put(output.getID(), output);
+    }
+
+    public void addOutput(OwsCodeType id, Data data) {
+        addOutput(new ProcessOutput(id, data));
+    }
+
+    public void addOutput(String id, Data data) {
+        addOutput(new OwsCodeType(id), data);
     }
 
 }

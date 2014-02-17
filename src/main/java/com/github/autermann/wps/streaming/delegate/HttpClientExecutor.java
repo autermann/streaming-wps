@@ -31,7 +31,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.google.common.base.Preconditions;
 
@@ -47,10 +46,9 @@ public class HttpClientExecutor extends DelegatingExecutor {
     private final CloseableHttpClient client;
 
     public HttpClientExecutor(MessageReceiver callback,
-                              OwsCodeType processId,
-                              URI remoteUrl) {
-        super(callback, processId);
-        this.remoteURL = Preconditions.checkNotNull(remoteUrl);
+                              DelegatingProcessConfiguration configuration) {
+        super(callback, configuration);
+        this.remoteURL = Preconditions.checkNotNull(configuration.getRemoteURL());
         this.client = createHttpClient();
     }
 

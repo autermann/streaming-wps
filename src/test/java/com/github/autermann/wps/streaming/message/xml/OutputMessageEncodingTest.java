@@ -25,12 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.Data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data.LiteralData;
-import com.github.autermann.wps.streaming.data.ProcessOutput;
 import com.github.autermann.wps.streaming.data.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.OutputMessage;
 
@@ -69,9 +68,9 @@ public class OutputMessageEncodingTest {
         OutputMessage message = new OutputMessage();
         message.setProcessID(StreamingProcessID.create());
         ProcessOutputs outputs = new ProcessOutputs();
-        outputs.addOutput(new ProcessOutput(new OwsCodeType("input1"), new LiteralData("xs:string", "input1")));
-        outputs.addOutput(new ProcessOutput(new OwsCodeType("input2"), new ComplexData("text/csv", "UTF-8", "<hello>w</hello>")));
-        outputs.addOutput(new ProcessOutput(new OwsCodeType("input5"), new BoundingBoxData(EncodingTestHelper.createBoundingBox())));
+        outputs.addOutput("input1", new LiteralData("xs:string", "input1"));
+        outputs.addOutput("input2", new ComplexData(new Format("text/csv", "UTF-8"), "<hello>w</hello>"));
+        outputs.addOutput("input5", new BoundingBoxData(EncodingTestHelper.createBoundingBox()));
         message.setPayload(outputs);
         return message;
     }
