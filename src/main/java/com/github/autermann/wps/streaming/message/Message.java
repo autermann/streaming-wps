@@ -20,6 +20,7 @@ package com.github.autermann.wps.streaming.message;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceivers;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -46,4 +47,16 @@ public abstract class Message extends SoapMessage {
     public void setReceiver(MessageReceiver receiver) {
         this.receiver = Preconditions.checkNotNull(receiver);
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", getID())
+                .add("action", getSOAPAction())
+                .add("process", getProcessID())
+                .toString();
+
+    }
+
+
 }

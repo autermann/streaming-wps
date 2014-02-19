@@ -46,10 +46,15 @@ import com.github.autermann.wps.streaming.util.dependency.MissingInputException;
  */
 public class StreamingProcessor extends AbstractMessageReceiver {
     private static final Logger log = LoggerFactory.getLogger(StreamingProcessor.class);
+    private final StreamingProcessID id;
     private final Lock lock = new ReentrantLock();
     private final DelegatingMessageReceiver toClients
             = new DelegatingMessageReceiver();
     private StreamingDependencyExecutor executor;
+
+    public StreamingProcessor(StreamingProcessID id) {
+        this.id = id;
+    }
 
     public StreamingDependencyExecutor getExecutor() {
         return executor;
@@ -125,6 +130,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
             } catch (IOException e) {
                 log.error("Error closing JobExecutor", e);
             }
+            MessageBroker.getInstance().removeProcess(this.id);
         }
     }
 

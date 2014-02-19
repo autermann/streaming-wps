@@ -44,13 +44,14 @@ public class MessageBroker implements MessageReceiver{
         this.processes.put(process.getID(), process);
     }
 
-    public void removeProcess(StreamingProcess process) {
-        this.processes.remove(process.getID());
+    public void removeProcess(StreamingProcessID process) {
+        log.debug("Removed process {}", process);
+        this.processes.remove(process);
     }
 
     @Override
     public void receive(Message message) {
-        log.debug("Receiving message: {}", message);
+        log.debug("Receiving message: {} for {}", message, message.getProcessID());
         try {
             receive1(message);
         } catch (StreamingError ex) {
@@ -61,11 +62,13 @@ public class MessageBroker implements MessageReceiver{
     private void receive1(Message message) throws StreamingError {
         StreamingProcess process = processes.get(message.getProcessID());
         if (process == null) {
+            log.debug("Request for unknown process: {}", message.getProcessID());
             throw new StreamingError("Unknown ProcessId",
                                      StreamingError.INVALID_PARAMETER_VALUE);
         }
         try {
             process.getInput().receive(message);
+            log.debug("Served message for process: {}", process.getID());
         } catch (UnsupportedMessageTypeException e) {
             throw new StreamingError("Unsupported Message",
                                      StreamingError.OPERATION_NOT_SUPPORTED, e);
