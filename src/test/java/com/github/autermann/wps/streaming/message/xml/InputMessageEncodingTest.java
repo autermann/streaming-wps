@@ -22,7 +22,7 @@ import static com.github.autermann.wps.streaming.message.xml.EncodingTestHelper.
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import net.opengis.wps.x100.InputReferenceType;
+import java.net.URI;
 
 import org.apache.xmlbeans.XmlException;
 import org.junit.Before;
@@ -81,16 +81,12 @@ public class InputMessageEncodingTest {
                 .addDataInput("input1", new LiteralData("xs:string", "input1"))
                 .addDataInput("input2", new ComplexData(FORMAT_CSV, "<hello>w</hello>"))
                 .addReferenceInput("input3", ref, "output1")
-                .addDataInput("input4", new ReferencedData(createInputReference()))
+                .addDataInput("input4", new ReferencedData(URI.create(REFERENCED_DATA_HREF), new Format(null, null, REFERENCED_DATA_SCHEMA)))
                 .addDataInput("input5", new BoundingBoxData(createBoundingBox())));
         return message;
     }
-
-    private InputReferenceType createInputReference() throws XmlException {
-        return InputReferenceType.Factory
-                .parse("<wps:Reference xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" schema=\"http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\" xlink:href=\"http://geoprocessing.demo.52north.org:8080/geoserver/wfs?SERVICE=WFS&amp;VERSION=1.0.0&amp;REQUEST=GetFeature&amp;TYPENAME=topp:tasmania_roads&amp;SRS=EPSG:4326&amp;OUTPUTFORMAT=GML3\" method=\"GET\"/>");
-    }
-
-
-
+    public static final String REFERENCED_DATA_SCHEMA
+            = "http://schemas.opengis.net/gml/3.1.1/base/gml.xsd";
+    public static final String REFERENCED_DATA_HREF
+            = "http://geoprocessing.demo.52north.org:8080/geoserver/wfs?SERVICE=WFS&amp;VERSION=1.0.0&amp;REQUEST=GetFeature&amp;TYPENAME=topp:tasmania_roads&amp;SRS=EPSG:4326&amp;OUTPUTFORMAT=GML3";
 }

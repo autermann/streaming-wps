@@ -51,7 +51,7 @@ public class CommonEncoding {
         Data data = streamingInput.getData();
         if (data instanceof ReferencedData) {
             ReferencedData referencedData = (ReferencedData) data;
-            xbStreamingInput.set(referencedData.getXml());
+            referencedData.encodeTo(xbStreamingInput.addNewReference());
         } else {
             encodeData(xbStreamingInput.addNewData(), data);
         }
@@ -63,7 +63,7 @@ public class CommonEncoding {
         OwsCodeType id = OwsCodeType.of(xbStreamingInput.getIdentifier());
         final Data data;
         if (xbStreamingInput.getReference() != null) {
-            data = new ReferencedData(xbStreamingInput.getReference());
+            data = ReferencedData.of(xbStreamingInput.getReference());
         } else {
             data = decodeData(xbStreamingInput.getData());
         }
