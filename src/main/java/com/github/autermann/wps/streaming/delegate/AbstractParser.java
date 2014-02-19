@@ -35,6 +35,8 @@ import com.google.common.io.BaseEncoding;
  * @author Christian Autermann
  */
 public abstract class AbstractParser implements IParser {
+    public static final String MEDIA_TYPE_TEXT_XML = "text/xml";
+    public static final String ENCODING_UTF8 = "UTF-8";
 
     private final Format format;
     private final Class<? extends IData> bindingClass;

@@ -30,7 +30,6 @@ import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
 import com.github.autermann.wps.streaming.xml.StaticInputsDocument;
-import com.google.common.net.MediaType;
 
 /**
  * TODO JavaDoc
@@ -41,9 +40,8 @@ public class StaticInputParser extends AbstractParser {
     private final CommonEncoding commonEncoding = new CommonEncoding();
 
     public StaticInputParser() {
-        super(new Format(
-                MediaType.XML_UTF_8.toString(), DEFAULT_ENCODING,
-                SchemaConstants.SCHEMA_LOCATION_STATIC_INPUTS),
+        super(new Format(MEDIA_TYPE_TEXT_XML, ENCODING_UTF8,
+                         SchemaConstants.SCHEMA_LOCATION_STATIC_INPUTS),
               StaticInputBinding.class);
     }
 

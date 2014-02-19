@@ -17,7 +17,6 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
-import static org.n52.wps.io.IOHandler.DEFAULT_ENCODING;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +29,6 @@ import org.apache.xmlbeans.XmlException;
 import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
-import com.google.common.net.MediaType;
 
 /**
  * TODO JavaDoc
@@ -40,9 +38,8 @@ import com.google.common.net.MediaType;
 public class ProcessDescriptionParser extends AbstractParser {
 
     public ProcessDescriptionParser() {
-        super(new Format(
-                MediaType.XML_UTF_8.toString(), DEFAULT_ENCODING,
-                SchemaConstants.SCHEMA_LOCATION_PROCESS_DESCRIPTIONS),
+        super(new Format(MEDIA_TYPE_TEXT_XML, ENCODING_UTF8,
+                         SchemaConstants.SCHEMA_LOCATION_PROCESS_DESCRIPTIONS),
               ProcessDescriptionBinding.class);
     }
 
