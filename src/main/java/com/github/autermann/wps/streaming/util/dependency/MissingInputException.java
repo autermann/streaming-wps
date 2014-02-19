@@ -23,4 +23,5 @@ package com.github.autermann.wps.streaming.util.dependency;
  * @author Christian Autermann
  */
 public class MissingInputException extends Exception {
+    private static final long serialVersionUID = -7937098745144337428L;
 }

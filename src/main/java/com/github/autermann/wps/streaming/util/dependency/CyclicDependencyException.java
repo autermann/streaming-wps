@@ -23,6 +23,7 @@ package com.github.autermann.wps.streaming.util.dependency;
  * @author Christian Autermann
  */
 public class CyclicDependencyException extends Exception {
+    private static final long serialVersionUID = 8085712770189735346L;
 
     public CyclicDependencyException(String message) {
         super(message);

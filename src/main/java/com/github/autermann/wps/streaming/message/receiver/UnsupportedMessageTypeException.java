@@ -25,6 +25,7 @@ import com.github.autermann.wps.streaming.message.Message;
  * @author Christian Autermann
  */
 public class UnsupportedMessageTypeException extends RuntimeException {
+    private static final long serialVersionUID = 580264243536888880L;
 
     public UnsupportedMessageTypeException(Message message) {
         super("Message " + message + " is not supported");
