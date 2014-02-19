@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 import net.opengis.ows.x11.ExceptionReportDocument;
@@ -30,6 +31,7 @@ import net.opengis.wps.x100.DocumentOutputDefinitionType;
 import net.opengis.wps.x100.ExecuteDocument;
 import net.opengis.wps.x100.ExecuteDocument.Execute;
 import net.opengis.wps.x100.ExecuteResponseDocument;
+import net.opengis.wps.x100.ExecuteResponseDocument.ExecuteResponse;
 import net.opengis.wps.x100.OutputDataType;
 import net.opengis.wps.x100.ResponseDocumentType;
 import net.opengis.wps.x100.ResponseFormType;
@@ -58,7 +60,8 @@ import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
-import com.google.common.io.Closeables;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 
 /**
  * TODO JavaDoc
@@ -89,13 +92,32 @@ public class DelegatingExecutor extends StreamingExecutor {
         return HttpClients.custom().setConnectionManager(cm).build();
     }
 
-    private InputStream send(ExecuteDocument request) throws IOException {
+    private String executeRemote(String request) throws IOException {
         HttpPost httpRequest = new HttpPost(this.remoteURL);
         httpRequest.setEntity(EntityBuilder.create()
-                .setContentType(CONTENT_TYPE)
-                .setStream(request.newInputStream()).build());
-        CloseableHttpResponse httpResponse = client.execute(httpRequest);
-        return httpResponse.getEntity().getContent();
+                .setContentType(CONTENT_TYPE).setText(request).build());
+        try (CloseableHttpResponse httpResponse = client.execute(httpRequest);
+             InputStream entity = httpResponse.getEntity().getContent();
+             InputStreamReader reader = new InputStreamReader(entity, Charsets.UTF_8)) {
+            return CharStreams.toString(reader);
+        }
+    }
+
+    private ExecuteResponseDocument executeRemote(ExecuteDocument xbRequest)
+            throws IOException, StreamingError {
+        String response = executeRemote(xbRequest.xmlText());
+        try {
+            XmlObject o = XmlObject.Factory.parse(response);
+            if (o instanceof ExecuteResponseDocument) {
+                return (ExecuteResponseDocument) o;
+            } else if (o instanceof ExceptionReportDocument) {
+                throw decodeExceptionReport((ExceptionReportDocument) o);
+            } else {
+                throw remoteComputationError("Can not parse response");
+            }
+        } catch (XmlException ex) {
+            throw remoteComputationError("Can not parse response", ex);
+        }
     }
 
     @Override
@@ -108,94 +130,36 @@ public class DelegatingExecutor extends StreamingExecutor {
     }
 
     @Override
-    protected ProcessOutputs execute(ProcessInputs inputs)
-            throws StreamingError {
+    protected ProcessOutputs execute(ProcessInputs inputs) throws StreamingError {
         try {
-            ExecuteDocument request = encodeRequest(inputs);
-            ExecuteResponseDocument response = execute(request);
-            ProcessOutputs outputs = decodeResponse(response);
+            ExecuteDocument xbRequest = encodeRequest(inputs);
+            ExecuteResponseDocument xbResponse = executeRemote(xbRequest);
+            ProcessOutputs outputs = decodeResponse(xbResponse);
             return outputs;
-        } catch (StreamingError ex) {
-            throw ex; // do not wrap streaming errors
-        } catch (ExceptionReport | IOException ex) {
-            throw new StreamingError("Delegated process failed",
-                                     StreamingError.REMOTE_COMPUTATION_ERROR, ex);
+        } catch (IOException ex) {
+            throw remoteComputationError("Delegated process failed", ex);
         }
     }
 
-    private ExecuteResponseDocument execute(ExecuteDocument request)
-            throws ExceptionReport, IOException {
-        InputStream response = null;
-        try {
-            response = send(request);
-            return parseResponse(response);
-        } finally {
-            Closeables.close(response, true);
-        }
-    }
-
-    private ExecuteResponseDocument parseResponse(InputStream in)
-            throws IOException, ExceptionReport {
-        try {
-            XmlObject o = XmlObject.Factory.parse(in);
-            if (o instanceof ExecuteResponseDocument) {
-                return (ExecuteResponseDocument) o;
-            } else if (o instanceof ExceptionReportDocument) {
-                return parseExceptionReport((ExceptionReportDocument) o);
-            } else {
-                throw new StreamingError("Can not parse response",
-                                         StreamingError.REMOTE_COMPUTATION_ERROR);
-            }
-        } catch (XmlException ex) {
-            throw new StreamingError("Can not parse response",
-                                     StreamingError.REMOTE_COMPUTATION_ERROR, ex);
-        }
-    }
-
-    private <T> T parseExceptionReport(ExceptionReportDocument document)
-            throws ExceptionReport {
-        ExceptionReportDocument.ExceptionReport xbExceptionReport
-                = document.getExceptionReport();
-        for (ExceptionType xbException : xbExceptionReport
-                .getExceptionArray()) {
-            String code = xbException.getExceptionCode();
-            if (code == null ||
-                code.equals(ErrorMessageEncoding.JAVA_ROOT_CAUSE_EXCEPTION_CODE) ||
-                code.equals(ErrorMessageEncoding.JAVA_STACK_TRACE_EXCEPTION_CODE)) {
-                continue;
-            }
-            String locator = xbException.getLocator();
-            String message = null;
-            if (xbException.getExceptionTextArray().length > 0) {
-                xbException.getExceptionTextArray(0);
-            }
-            throw new ExceptionReport(message, code, locator);
-        }
-        throw new StreamingError("Can not parse ExceptionReport",
-                                 StreamingError.REMOTE_COMPUTATION_ERROR);
-    }
 
     private ExecuteDocument encodeRequest(ProcessInputs inputs)
-            throws StreamingError {
+        throws StreamingError {
         try {
             ExecuteDocument document = ExecuteDocument.Factory.newInstance();
             Execute execute = document.addNewExecute();
             execute.setService(WPS_SERVICE_TYPE);
             execute.setVersion(WPS_SERVICE_VERSION);
             getDescription().getID().encodeTo(execute.addNewIdentifier());
-            DataInputsType xbDataInputs = execute.addNewDataInputs();
+            DataInputsType xbInputs = execute.addNewDataInputs();
             for (ProcessInput input : inputs.getInputs()) {
-                //TODO verify inputs...
-                encoding.encodeInput(xbDataInputs.addNewInput(), (DataProcessInput) input);
+                encoding.encodeInput(xbInputs.addNewInput(), (DataProcessInput) input);
             }
             ResponseFormType responseForm = execute.addNewResponseForm();
             ResponseDocumentType responseDocument = responseForm.addNewResponseDocument();
             for (OwsCodeType id : getDescription().getOutputs()) {
                 ProcessOutputDescription output = getDescription().getOutput(id);
-                DocumentOutputDefinitionType xbOutput = responseDocument.addNewOutput();
+                DocumentOutputDefinitionType xbOutput= responseDocument.addNewOutput();
                 output.getID().encodeTo(xbOutput.addNewIdentifier());
-                xbOutput.setAsReference(false);
-
                 if (output.isComplex()) {
                     if (getDescription().isStoreSupported()) {
                         xbOutput.setAsReference(true);
@@ -211,21 +175,19 @@ public class DelegatingExecutor extends StreamingExecutor {
                     }
                 }
             }
-
             return document;
         } catch (XmlException ex) {
             throw new StreamingError("Could not encode execute request",
-                                     StreamingError.NO_APPLICABLE_CODE, ex);
-
+                    StreamingError.NO_APPLICABLE_CODE, ex);
         }
     }
 
-    private ProcessOutputs decodeResponse(ExecuteResponseDocument response)
-            throws StreamingError {
+    private ProcessOutputs decodeResponse(ExecuteResponseDocument response) throws StreamingError {
         try {
+            ExecuteResponse executeResponse = response.getExecuteResponse();
+            ExecuteResponse.ProcessOutputs xbProcessOutputs = executeResponse.getProcessOutputs();
             ProcessOutputs outputs = new ProcessOutputs();
-            OutputDataType[] xbOutputs = response.getExecuteResponse()
-                    .getProcessOutputs().getOutputArray();
+            OutputDataType[] xbOutputs = xbProcessOutputs.getOutputArray();
             for (OutputDataType xbOutput : xbOutputs) {
                 outputs.addOutput(encoding.decodeOutput(xbOutput));
             }
@@ -234,5 +196,32 @@ public class DelegatingExecutor extends StreamingExecutor {
             throw new StreamingError("Can not decode execute response",
                                      StreamingError.NO_APPLICABLE_CODE, ex);
         }
+    }
+
+    private StreamingError decodeExceptionReport(ExceptionReportDocument document) {
+        ExceptionReportDocument.ExceptionReport xbExceptionReport = document.getExceptionReport();
+        for (ExceptionType xbException : xbExceptionReport.getExceptionArray()) {
+            String code = xbException.getExceptionCode();
+            if (code == null ||
+                        code.equals(ErrorMessageEncoding.JAVA_ROOT_CAUSE_EXCEPTION_CODE) ||
+                        code.equals(ErrorMessageEncoding.JAVA_STACK_TRACE_EXCEPTION_CODE)) {
+                continue;
+            }
+            String message = null;
+            if (xbException.getExceptionTextArray().length > 0) {
+                message = xbException.getExceptionTextArray(0);
+            }
+            ExceptionReport ex = new ExceptionReport(message, code, xbException.getLocator());
+            return remoteComputationError("Remote computation failed", ex);
+        }
+        return remoteComputationError("Can not parse ExceptionReport");
+    }
+
+    private static StreamingError remoteComputationError(String message, Throwable cause) {
+        return new StreamingError(message, StreamingError.REMOTE_COMPUTATION_ERROR, cause);
+    }
+
+    private static StreamingError remoteComputationError(String message) {
+        return new StreamingError(message, StreamingError.REMOTE_COMPUTATION_ERROR);
     }
 }
