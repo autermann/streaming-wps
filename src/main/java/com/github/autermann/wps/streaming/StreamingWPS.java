@@ -17,10 +17,18 @@
  */
 package com.github.autermann.wps.streaming;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.websocket.Extension;
+import javax.websocket.server.ServerEndpointConfig;
+import javax.websocket.server.ServerEndpointConfig.Configurator;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+
 import org.n52.wps.server.RetrieveResultServlet;
 import org.n52.wps.server.WebProcessingService;
 
@@ -46,7 +54,19 @@ public class StreamingWPS extends WPS {
                 ServletContextHandler.SESSIONS);
         ServerContainer sc = WebSocketServerContainerInitializer
                 .configureContext(handler);
-        sc.addEndpoint(StreamingSocketEndpoint.class);
+        sc.addEndpoint(ServerEndpointConfig.Builder
+                .create(StreamingSocketEndpoint.class,
+                        StreamingSocketEndpoint.PATH)
+                .configurator(new Configurator() {
+
+                    @Override
+                    public List<Extension> getNegotiatedExtensions(
+                            List<Extension> installed,
+                            List<Extension> requested) {
+                                return Collections.emptyList();
+                            }
+
+                }).build());
         handler.addServlet(WebProcessingService.class,
                            WEB_PROCESSING_SERVICE_PATH);
         handler.addServlet(RetrieveResultServlet.class,
