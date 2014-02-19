@@ -20,7 +20,6 @@ package com.github.autermann.wps.streaming.util.dependency;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -164,9 +163,8 @@ public class DependencyExecutor<K, I, O> {
         }
     }
 
-    public void addJob(K key, K... dependencies)
-            throws CyclicDependencyException {
-        addJob(key, Arrays.asList(dependencies));
+    public void addJob(K key) throws CyclicDependencyException {
+        addJob(key, Collections.<K>emptyList());
     }
 
     public void addJob(K key, Iterable<K> dependencies)
