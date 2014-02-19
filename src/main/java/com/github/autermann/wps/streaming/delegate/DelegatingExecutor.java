@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import net.opengis.ows.x11.ExceptionReportDocument;
 import net.opengis.ows.x11.ExceptionType;
@@ -33,6 +34,13 @@ import net.opengis.wps.x100.OutputDataType;
 import net.opengis.wps.x100.ResponseDocumentType;
 import net.opengis.wps.x100.ResponseFormType;
 
+import org.apache.http.client.entity.EntityBuilder;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
@@ -41,12 +49,12 @@ import org.n52.wps.server.ExceptionReport;
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.commons.description.ProcessOutputDescription;
-import com.github.autermann.wps.streaming.CallbackJobExecutor;
-import com.github.autermann.wps.streaming.data.input.ProcessInput;
+import com.github.autermann.wps.streaming.StreamingExecutor;
+import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.data.input.DataProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
-import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
@@ -57,16 +65,46 @@ import com.google.common.io.Closeables;
  *
  * @author Christian Autermann
  */
-public abstract class DelegatingExecutor extends CallbackJobExecutor {
+public class DelegatingExecutor extends StreamingExecutor {
+    private static final ContentType CONTENT_TYPE = ContentType
+            .create("application/xml");
     private static final String WPS_SERVICE_VERSION = "1.0.0";
     private static final String WPS_SERVICE_TYPE = "WPS";
     private final ProcessDescription description;
     private final CommonEncoding encoding = new CommonEncoding();
+    private final URI remoteURL;
+    private final CloseableHttpClient client;
 
     public DelegatingExecutor(MessageReceiver callback,
                               DelegatingProcessConfiguration configuration) {
-        super(callback);
+        super(callback, configuration);
         this.description = checkNotNull(configuration.getProcessDescription());
+        this.remoteURL = checkNotNull(configuration.getRemoteURL());
+        this.client = createHttpClient();
+    }
+
+    private CloseableHttpClient createHttpClient() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(100);
+        return HttpClients.custom().setConnectionManager(cm).build();
+    }
+
+    private InputStream send(ExecuteDocument request) throws IOException {
+        HttpPost httpRequest = new HttpPost(this.remoteURL);
+        httpRequest.setEntity(EntityBuilder.create()
+                .setContentType(CONTENT_TYPE)
+                .setStream(request.newInputStream()).build());
+        CloseableHttpResponse httpResponse = client.execute(httpRequest);
+        return httpResponse.getEntity().getContent();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.client.close();
+    }
+
+    protected ProcessDescription getDescription() {
+        return description;
     }
 
     @Override
@@ -115,7 +153,7 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
     }
 
     private <T> T parseExceptionReport(ExceptionReportDocument document)
-            throws ExceptionReport, StreamingError {
+            throws ExceptionReport {
         ExceptionReportDocument.ExceptionReport xbExceptionReport
                 = document.getExceptionReport();
         for (ExceptionType xbException : xbExceptionReport
@@ -144,7 +182,7 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             Execute execute = document.addNewExecute();
             execute.setService(WPS_SERVICE_TYPE);
             execute.setVersion(WPS_SERVICE_VERSION);
-            description.getID().encodeTo(execute.addNewIdentifier());
+            getDescription().getID().encodeTo(execute.addNewIdentifier());
             DataInputsType xbDataInputs = execute.addNewDataInputs();
             for (ProcessInput input : inputs.getInputs()) {
                 //TODO verify inputs...
@@ -152,14 +190,14 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             }
             ResponseFormType responseForm = execute.addNewResponseForm();
             ResponseDocumentType responseDocument = responseForm.addNewResponseDocument();
-            for (OwsCodeType id : description.getOutputs()) {
-                ProcessOutputDescription output = description.getOutput(id);
+            for (OwsCodeType id : getDescription().getOutputs()) {
+                ProcessOutputDescription output = getDescription().getOutput(id);
                 DocumentOutputDefinitionType xbOutput = responseDocument.addNewOutput();
                 output.getID().encodeTo(xbOutput.addNewIdentifier());
                 xbOutput.setAsReference(false);
 
                 if (output.isComplex()) {
-                    if (description.isStoreSupported()) {
+                    if (getDescription().isStoreSupported()) {
                         xbOutput.setAsReference(true);
                     }
                     output.asComplex().getDefaultFormat().encodeTo(xbOutput);
@@ -197,7 +235,4 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
                                      StreamingError.NO_APPLICABLE_CODE, ex);
         }
     }
-
-    protected abstract InputStream send(ExecuteDocument request) throws
-            IOException;
 }

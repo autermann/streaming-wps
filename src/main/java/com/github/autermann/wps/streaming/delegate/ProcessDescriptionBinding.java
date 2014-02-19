@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
  * @author Christian Autermann
  */
 public class ProcessDescriptionBinding implements IComplexData {
+    private static final long serialVersionUID = -1780445465464228923L;
     private final ProcessDescription processDescription;
 
     public ProcessDescriptionBinding(ProcessDescription processDescription) {

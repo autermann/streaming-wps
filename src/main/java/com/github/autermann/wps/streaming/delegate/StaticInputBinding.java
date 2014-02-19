@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
  * @author Christian Autermann
  */
 public class StaticInputBinding implements IComplexData {
+    private static final long serialVersionUID = -2403736388760012220L;
 
     private final ProcessInputs inputs;
 

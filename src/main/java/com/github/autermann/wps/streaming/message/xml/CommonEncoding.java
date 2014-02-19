@@ -31,16 +31,12 @@ import org.apache.xmlbeans.XmlString;
 import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.BoundingBoxData;
+import com.github.autermann.wps.streaming.data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data;
-import com.github.autermann.wps.streaming.data.BoundingBoxData;
-import com.github.autermann.wps.streaming.data.ComplexData;
-import com.github.autermann.wps.streaming.data.ComplexData;
 import com.github.autermann.wps.streaming.data.LiteralData;
-import com.github.autermann.wps.streaming.data.ReferencedData;
 import com.github.autermann.wps.streaming.data.ReferencedData;
 import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInput;
-import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.data.output.ProcessOutput;
 
 /**

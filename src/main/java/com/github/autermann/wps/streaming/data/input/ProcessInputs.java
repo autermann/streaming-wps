@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
+import com.github.autermann.wps.streaming.message.MessageID;
 import com.google.common.collect.LinkedListMultimap;
 
 /**
@@ -43,22 +44,47 @@ public class ProcessInputs implements Iterable<ProcessInput> {
         return Collections.unmodifiableList(inputs.get(inputId));
     }
 
-    public void addInput(ProcessInput input) {
+    public ProcessInputs addInput(ProcessInput input) {
         this.inputs.put(input.getID(), input);
+        return this;
     }
 
-    public void addInput(OwsCodeType id, Data data) {
-        addInput(new DataProcessInput(id, data));
+    public ProcessInputs addDataInput(OwsCodeType id, Data data) {
+        return addInput(new DataProcessInput(id, data));
     }
 
-    public void addInput(String id, Data data) {
-        addInput(new OwsCodeType(id), data);
+    public ProcessInputs addDataInput(String id, Data data) {
+        return addDataInput(new OwsCodeType(id), data);
     }
 
-    public void addInputs(Iterable<? extends ProcessInput> inputs) {
+    public ProcessInputs addReferenceInput(OwsCodeType id, MessageID iteration, OwsCodeType output) {
+        return addInput(new ReferenceProcessInput(id, iteration, output));
+    }
+
+    public ProcessInputs addReferenceInput(String id, MessageID iteration, OwsCodeType output) {
+        return addInput(new ReferenceProcessInput(id, iteration, output));
+    }
+
+    public ProcessInputs addReferenceInput(OwsCodeType id, MessageID iteration, String output) {
+        return addInput(new ReferenceProcessInput(id, iteration, output));
+    }
+
+    public ProcessInputs addReferenceInput(String id, MessageID iteration, String output) {
+        return addInput(new ReferenceProcessInput(id, iteration, output));
+    }
+
+    public ProcessInputs addInputs(ProcessInputs inputs) {
+        if (inputs != this) {
+            addInputs(inputs.getInputs());
+        }
+        return this;
+    }
+
+    public ProcessInputs addInputs(Iterable<? extends ProcessInput> inputs) {
         for (ProcessInput input : inputs) {
             addInput(input);
         }
+        return this;
     }
 
     @Override

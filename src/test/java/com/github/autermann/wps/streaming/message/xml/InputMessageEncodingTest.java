@@ -30,14 +30,11 @@ import org.junit.Test;
 import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
 import com.github.autermann.wps.commons.Format;
-import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.StreamingProcessID;
 import com.github.autermann.wps.streaming.data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.ComplexData;
 import com.github.autermann.wps.streaming.data.LiteralData;
 import com.github.autermann.wps.streaming.data.ReferencedData;
-import com.github.autermann.wps.streaming.data.input.DataProcessInput;
-import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.MessageID;
@@ -48,6 +45,7 @@ import com.github.autermann.wps.streaming.message.MessageID;
  * @author Christian Autermann
  */
 public class InputMessageEncodingTest {
+    private static final Format FORMAT_CSV = new Format("text/csv", "UTF-8");
     private MessageEncoding<InputMessage> encoding;
 
     @Before
@@ -73,18 +71,18 @@ public class InputMessageEncodingTest {
         return EnvelopeDocument.Factory.parse(encode);
     }
 
-    private InputMessage createMessage() throws XmlException {
-        ProcessInputs inputs = new ProcessInputs();
+    private InputMessage createMessage()
+            throws XmlException {
         StreamingProcessID processId = StreamingProcessID.create();
         MessageID ref = MessageID.create();
-        inputs.addInput(new DataProcessInput(new OwsCodeType("input1"), new LiteralData("xs:string", "input1")));
-        inputs.addInput(new DataProcessInput(new OwsCodeType("input2"), new ComplexData(new Format("text/csv", "UTF-8"), "<hello>w</hello>")));
-        inputs.addInput(new ReferenceProcessInput(new OwsCodeType("input3"), ref, new OwsCodeType("output1")));
-        inputs.addInput(new DataProcessInput(new OwsCodeType("input4"), new ReferencedData(createInputReference())));
-        inputs.addInput(new DataProcessInput(new OwsCodeType("input5"), new BoundingBoxData(createBoundingBox())));
         InputMessage message = new InputMessage();
         message.setProcessID(processId);
-        message.setPayload(inputs);
+        message.setPayload(new ProcessInputs()
+                .addDataInput("input1", new LiteralData("xs:string", "input1"))
+                .addDataInput("input2", new ComplexData(FORMAT_CSV, "<hello>w</hello>"))
+                .addReferenceInput("input3", ref, "output1")
+                .addDataInput("input4", new ReferencedData(createInputReference()))
+                .addDataInput("input5", new BoundingBoxData(createBoundingBox())));
         return message;
     }
 

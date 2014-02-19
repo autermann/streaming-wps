@@ -41,16 +41,14 @@ public class ProcessDescriptionParser extends AbstractParser {
 
     public ProcessDescriptionParser() {
         super(new Format(
-                MediaType.XML_UTF_8.toString(),
-                DEFAULT_ENCODING,
+                MediaType.XML_UTF_8.toString(), DEFAULT_ENCODING,
                 SchemaConstants.SCHEMA_LOCATION_PROCESS_DESCRIPTIONS),
               ProcessDescriptionBinding.class);
     }
 
     @Override
     protected ProcessDescriptionBinding parse(InputStream input)
-            throws
-            IOException {
+            throws IOException {
         try {
             ProcessDescriptionsDocument doc = ProcessDescriptionsDocument.Factory.parse(input);
             ProcessDescriptionType xbPd = doc.getProcessDescriptions().getProcessDescriptionArray(0);

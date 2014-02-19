@@ -40,6 +40,25 @@ public class ReferenceProcessInput extends ProcessInput {
         this.output = checkNotNull(output);
     }
 
+    public ReferenceProcessInput(String id,
+                                 MessageID iteration,
+                                 String output) {
+        this(new OwsCodeType(id), iteration, new OwsCodeType(output));
+    }
+
+    public ReferenceProcessInput(OwsCodeType id,
+                                 MessageID iteration,
+                                 String output) {
+        this(id, iteration, new OwsCodeType(output));
+    }
+
+    public ReferenceProcessInput(String id,
+                                 MessageID iteration,
+                                 OwsCodeType output) {
+        this(new OwsCodeType(id), iteration, output);
+
+    }
+
     public OwsCodeType getReferencedOutput() {
         return this.output;
     }

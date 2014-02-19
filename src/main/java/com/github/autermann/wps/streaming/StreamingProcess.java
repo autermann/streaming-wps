@@ -37,8 +37,8 @@ public class StreamingProcess implements Identifiable<StreamingProcessID> {
         StreamingProcessor processor = new StreamingProcessor();
         this.fromClient = MessageReceivers.onlyOutgoingMessages(processor);
         MessageReceiver callback = MessageReceivers.onlyIncomingMessages(processor);
-        StreamingExecutor executor = new StreamingExecutor(
-                configuration.createExecutor(callback),
+        StreamingDependencyExecutor executor = new StreamingDependencyExecutor(
+                configuration.createStreamingExecutor(callback),
                 configuration.createThreadPool(),
                 configuration.createMessageRepository());
         processor.setExecutor(executor);

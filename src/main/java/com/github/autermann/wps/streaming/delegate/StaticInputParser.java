@@ -42,8 +42,7 @@ public class StaticInputParser extends AbstractParser {
 
     public StaticInputParser() {
         super(new Format(
-                MediaType.XML_UTF_8.toString(),
-                DEFAULT_ENCODING,
+                MediaType.XML_UTF_8.toString(), DEFAULT_ENCODING,
                 SchemaConstants.SCHEMA_LOCATION_STATIC_INPUTS),
               StaticInputBinding.class);
     }

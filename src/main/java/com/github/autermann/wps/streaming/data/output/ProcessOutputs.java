@@ -43,22 +43,31 @@ public class ProcessOutputs implements Iterable<ProcessOutput> {
         return Collections.unmodifiableList(outputs.get(outputId));
     }
 
-    public void addOutput(ProcessOutput output) {
+    public ProcessOutputs addOutput(ProcessOutput output) {
         this.outputs.put(output.getID(), output);
+        return this;
     }
 
-    public void addOutput(OwsCodeType id, Data data) {
-        addOutput(new ProcessOutput(id, data));
+    public ProcessOutputs addOutput(OwsCodeType id, Data data) {
+        return addOutput(new ProcessOutput(id, data));
     }
 
-    public void addOutput(String id, Data data) {
-        addOutput(new OwsCodeType(id), data);
+    public ProcessOutputs addOutput(String id, Data data) {
+        return addOutput(new OwsCodeType(id), data);
     }
 
-    public void addOutputs(Iterable<? extends ProcessOutput> outputs) {
+    public ProcessOutputs addOutputs(ProcessOutputs outputs) {
+        if (outputs != this) {
+            addOutputs(outputs.getOutputs());
+        }
+        return this;
+    }
+
+    public ProcessOutputs addOutputs(Iterable<? extends ProcessOutput> outputs) {
         for (ProcessOutput output : outputs) {
             addOutput(output);
         }
+        return this;
     }
 
     @Override

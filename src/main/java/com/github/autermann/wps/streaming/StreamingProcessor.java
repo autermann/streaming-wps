@@ -49,13 +49,13 @@ public class StreamingProcessor extends AbstractMessageReceiver {
     private final Lock lock = new ReentrantLock();
     private final DelegatingMessageReceiver toClients
             = new DelegatingMessageReceiver();
-    private StreamingExecutor executor;
+    private StreamingDependencyExecutor executor;
 
-    public StreamingExecutor getExecutor() {
+    public StreamingDependencyExecutor getExecutor() {
         return executor;
     }
 
-    public void setExecutor(StreamingExecutor executor) {
+    public void setExecutor(StreamingDependencyExecutor executor) {
         this.executor = executor;
     }
 

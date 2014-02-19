@@ -17,6 +17,8 @@
  */
 package com.github.autermann.wps.streaming;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +30,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.n52.wps.server.CapabilitiesConfiguration;
 import org.n52.wps.server.WebProcessingService;
 
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.OutputMessage;
@@ -52,16 +55,22 @@ public abstract class ProcessConfiguration {
     private static final int THREADS = 10;
     private final URI socketURI;
     private final StreamingProcessID processId = StreamingProcessID.create();
+    private ProcessInputs commonInputs = new ProcessInputs();
 
     public ProcessConfiguration() {
         this.socketURI = createSocketURI();
     }
 
+    public ProcessInputs getStaticInputs() {
+        return commonInputs;
+    }
+    public void setStaticInputs(ProcessInputs staticInputs) {
+        this.commonInputs = checkNotNull(staticInputs);
+    }
+
     public StreamingProcessID getProcessID() {
         return processId;
     }
-
-    public abstract CallbackJobExecutor createExecutor(MessageReceiver callback);
 
     public ExecutorService createThreadPool() {
         String nameFormat = "streaming-process-" + getProcessID() + "-%d";
@@ -112,6 +121,8 @@ public abstract class ProcessConfiguration {
             return URI.create("ws://localhost:8080/streaming");
         }
     }
+
+    public abstract StreamingExecutor createStreamingExecutor(MessageReceiver callback);
 
     /**
      * Normalizes a path by returning {@code null} for {@code null}, {@code /}
