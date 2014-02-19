@@ -53,7 +53,6 @@ public class StreamingError extends ExceptionReport {
         return super.errorKey;
     }
 
-    @Override
     public String getLocator() {
         return super.locator;
     }
