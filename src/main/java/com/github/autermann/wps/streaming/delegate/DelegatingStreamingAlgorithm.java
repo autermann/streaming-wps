@@ -37,7 +37,8 @@ import com.github.autermann.wps.streaming.data.input.ProcessInputs;
  * @author Christian Autermann
  */
 @Algorithm(
-        identifier = "com.github.autermann.wps.DelegatingStreamingAlgorithm",
+        //this one seems be be ignored...
+        identifier = DelegatingStreamingAlgorithm.PROCESS_ID,
         title = "Delegating Streaming Algorithm",
         abstrakt = "Generic Streaming Algorithm to convert any existing WPS " +
                    "process into a streaming process.",
@@ -45,41 +46,56 @@ import com.github.autermann.wps.streaming.data.input.ProcessInputs;
         storeSupported = false,
         version = "1.0.0")
 public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
+    public static final String PROCESS_ID
+            = "com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm";
+    public static final String INPUT_REMOTE_PROCESS_DESCRIPTION
+            = "remote-process-description";
+    public static final String INPUT_REMOTE_WPS_URL = "remote-wps-url";
+    public static final String INPUT_STATIC_INPUTS = "static-inputs";
+    public static final String OUTPUT_PROCESS_ID = "process-id";
+    public static final String OUTPUT_INPUT_SOCKET_URI = "input-socket-uri";
+    public static final String OUTPUT_OUTPUT_SOCKET_URI = "output-socket-uri";
 
     private final DelegatingProcessConfiguration configuration
             = new DelegatingProcessConfiguration();
 
     @ComplexDataInput(
-            identifier = "remote-process-description",
+            identifier = INPUT_REMOTE_PROCESS_DESCRIPTION,
             title = "Remote Process Description",
             abstrakt = "Process description of the process to proxy",
             minOccurs = 1, maxOccurs = 1,
             binding = ProcessDescriptionBinding.class)
     public void setProcessDescription(ProcessDescription processDescription) {
-        this.configuration.setProcessDescription(processDescription);
+        if (processDescription != null) {
+            this.configuration.setProcessDescription(processDescription);
+        }
     }
 
     @LiteralDataInput(
-            identifier = "remote-wps-url",
+            identifier = INPUT_REMOTE_WPS_URL,
             title = "Remote WPS URL",
             abstrakt = "The URL of the WPS server to proxy",
             binding = LiteralAnyURIBinding.class)
     public void setRemoteURI(URI remoteURI) {
-        this.configuration.setRemoteURL(remoteURI);
+        if (remoteURI != null) {
+            this.configuration.setRemoteURL(remoteURI);
+        }
     }
 
     @ComplexDataInput(
-            identifier = "static-inputs",
+            identifier = INPUT_STATIC_INPUTS,
             title = "Static Inputs",
             abstrakt = "Common inputs for all streaming iterations",
             minOccurs = 0, maxOccurs = 1,
             binding = StaticInputBinding.class)
     public void setStaticInputs(ProcessInputs staticInputs) {
-        this.configuration.setStaticInputs(staticInputs);
+        if (staticInputs != null) {
+            this.configuration.setStaticInputs(staticInputs);
+        }
     }
 
     @LiteralDataOutput(
-            identifier = "process-id",
+            identifier = OUTPUT_PROCESS_ID,
             title = "The Process ID",
             abstrakt = "The process id of this instance.",
             binding = LiteralAnyURIBinding.class)
@@ -88,7 +104,7 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
     }
 
     @LiteralDataOutput(
-            identifier = "input-socket-uri",
+            identifier = OUTPUT_INPUT_SOCKET_URI,
             title = "The Input WebSocket URI",
             abstrakt = "The WebSocket URI to supply subsequent inputs.",
             binding = LiteralAnyURIBinding.class)
@@ -97,7 +113,7 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
     }
 
     @LiteralDataOutput(
-            identifier = "output-socket-uri",
+            identifier = OUTPUT_OUTPUT_SOCKET_URI,
             title = "The Output WebSocket URI",
             abstrakt = "The WebSocket URI to request outputs.",
             binding = LiteralAnyURIBinding.class)
