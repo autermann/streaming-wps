@@ -31,6 +31,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         StreamingWPS wps = new StreamingWPS("localhost", 12121);
         wps.addAlgorithm(DelegatingStreamingAlgorithm.class);
+        wps.addAlgorithm(TestAlgorithm.class);
         wps.addParser(ProcessDescriptionParser.class);
         wps.addParser(StaticInputParser.class);
         wps.start();
