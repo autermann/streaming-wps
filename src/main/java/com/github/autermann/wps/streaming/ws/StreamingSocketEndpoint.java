@@ -43,10 +43,11 @@ import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
  *
  * @author Christian Autermann
  */
-@ServerEndpoint(value = "/streaming",
+@ServerEndpoint(value = StreamingSocketEndpoint.PATH,
                 encoders = SocketMessageEncoding.class,
                 decoders = SocketMessageEncoding.class)
 public class StreamingSocketEndpoint implements MessageReceiver {
+    public static final String PATH = "/streaming";
     private static final Logger log = LoggerFactory
             .getLogger(StreamingSocketEndpoint.class);
     private final MessageBroker broker = MessageBroker.getInstance();

@@ -17,7 +17,6 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
-import com.github.autermann.wps.commons.description.ProcessDescription;
 import java.net.URI;
 
 import org.n52.wps.algorithm.annotation.Algorithm;
@@ -28,6 +27,7 @@ import org.n52.wps.algorithm.annotation.LiteralDataOutput;
 import org.n52.wps.io.data.binding.literal.LiteralAnyURIBinding;
 import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 
+import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.MessageBroker;
 import com.github.autermann.wps.streaming.data.ProcessInputs;
 
@@ -45,6 +45,7 @@ import com.github.autermann.wps.streaming.data.ProcessInputs;
         storeSupported = false,
         version = "1.0.0")
 public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
+
     private final DelegatingProcessConfiguration configuration
             = new DelegatingProcessConfiguration();
 
@@ -84,7 +85,24 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
             binding = LiteralAnyURIBinding.class)
     public URI getProcessID() {
         return configuration.getProcessID().toURI();
+    }
 
+    @LiteralDataOutput(
+            identifier = "input-socket-uri",
+            title = "The Input WebSocket URI",
+            abstrakt = "The WebSocket URI to supply subsequent inputs.",
+            binding = LiteralAnyURIBinding.class)
+    public URI getInputSocketURI() {
+        return this.configuration.getInputSocketURI();
+    }
+
+    @LiteralDataOutput(
+            identifier = "output-socket-uri",
+            title = "The Output WebSocket URI",
+            abstrakt = "The WebSocket URI to request outputs.",
+            binding = LiteralAnyURIBinding.class)
+    public URI getOutputSocketURI() {
+        return this.configuration.getOutputSocketURI();
     }
 
     @Execute
