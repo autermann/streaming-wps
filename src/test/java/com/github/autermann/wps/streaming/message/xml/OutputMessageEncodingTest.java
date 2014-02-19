@@ -27,10 +27,10 @@ import org.w3.x2003.x05.soapEnvelope.EnvelopeDocument;
 
 import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.streaming.StreamingProcessID;
-import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
-import com.github.autermann.wps.streaming.data.Data.ComplexData;
-import com.github.autermann.wps.streaming.data.Data.LiteralData;
-import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.data.BoundingBoxData;
+import com.github.autermann.wps.streaming.data.ComplexData;
+import com.github.autermann.wps.streaming.data.LiteralData;
+import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.OutputMessage;
 
 /**

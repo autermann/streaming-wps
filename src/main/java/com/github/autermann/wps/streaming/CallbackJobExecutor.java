@@ -25,13 +25,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
-import com.github.autermann.wps.streaming.data.ProcessInput;
-import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
-import com.github.autermann.wps.streaming.data.ProcessInput.ReferenceInput;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.data.ProcessOutput;
-import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInput;
+import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
+import com.github.autermann.wps.streaming.data.output.ProcessOutput;
+import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.data.StreamingError;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.OutputMessage;
@@ -91,12 +91,11 @@ public abstract class CallbackJobExecutor implements
         }
 
         for (ProcessInput input : inputMessage.getPayload()) {
-            if (input instanceof DataInput) {
+            if (input instanceof DataProcessInput) {
                 inputs.addInput(input);
-            } else if (input instanceof ReferenceInput) {
-                ReferenceInput referenceInput = (ReferenceInput) input;
-                ProcessOutputs outputs = messages.get(referenceInput
-                        .getReferencedMessage());
+            } else if (input instanceof ReferenceProcessInput) {
+                ReferenceProcessInput referenceInput = (ReferenceProcessInput) input;
+                ProcessOutputs outputs = messages.get(referenceInput.getReferencedMessage());
                 if (outputs == null) {
                     throw new StreamingError("ReferenceInput " + referenceInput +
                                              " can not be resolved",
@@ -123,7 +122,7 @@ public abstract class CallbackJobExecutor implements
                 .size());
 
         for (ProcessOutput output : outputs) {
-            inputs.add(new ProcessInput.DataInput(id, output.getData()));
+            inputs.add(new DataProcessInput(id, output.getData()));
         }
         return inputs;
     }

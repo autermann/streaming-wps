@@ -15,24 +15,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.data;
+package com.github.autermann.wps.streaming.data.output;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.commons.description.OwsCodeType;
-import com.github.autermann.wps.streaming.message.MessageID;
+import com.github.autermann.wps.streaming.data.Data;
+
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public abstract class ProcessInput implements Identifiable<OwsCodeType> {
+public class ProcessOutput implements Identifiable<OwsCodeType> {
+    private final Data data;
     private final OwsCodeType id;
 
-    private ProcessInput(OwsCodeType id) {
+    public ProcessOutput(OwsCodeType id, Data data) {
         this.id = checkNotNull(id);
+        this.data = checkNotNull(data);
     }
 
     @Override
@@ -40,37 +43,7 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
         return this.id;
     }
 
-    public static class DataInput extends ProcessInput {
-        private final Data data;
-
-        public DataInput(OwsCodeType id, Data data) {
-            super(id);
-            this.data = checkNotNull(data);
-        }
-
-        public Data getData() {
-            return this.data;
-        }
-    }
-
-    public static class ReferenceInput extends ProcessInput {
-        private final OwsCodeType output;
-        private final MessageID iteration;
-
-        public ReferenceInput(OwsCodeType id,
-                              MessageID iteration,
-                              OwsCodeType output) {
-            super(id);
-            this.iteration = checkNotNull(iteration);
-            this.output = checkNotNull(output);
-        }
-
-        public OwsCodeType getReferencedOutput() {
-            return this.output;
-        }
-
-        public MessageID getReferencedMessage() {
-            return this.iteration;
-        }
+    public Data getData() {
+        return data;
     }
 }

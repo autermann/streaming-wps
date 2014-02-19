@@ -42,10 +42,10 @@ import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.commons.description.ProcessOutputDescription;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
-import com.github.autermann.wps.streaming.data.ProcessInput;
-import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
-import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInput;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
+import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
@@ -148,7 +148,7 @@ public abstract class DelegatingExecutor extends CallbackJobExecutor {
             DataInputsType xbDataInputs = execute.addNewDataInputs();
             for (ProcessInput input : inputs.getInputs()) {
                 //TODO verify inputs...
-                encoding.encodeInput(xbDataInputs.addNewInput(), (DataInput) input);
+                encoding.encodeInput(xbDataInputs.addNewInput(), (DataProcessInput) input);
             }
             ResponseFormType responseForm = execute.addNewResponseForm();
             ResponseDocumentType responseDocument = responseForm.addNewResponseDocument();

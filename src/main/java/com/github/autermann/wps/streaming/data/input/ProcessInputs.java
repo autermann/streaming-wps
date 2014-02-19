@@ -15,13 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.data;
+package com.github.autermann.wps.streaming.data.input;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.streaming.data.Data;
 import com.google.common.collect.LinkedListMultimap;
 
 /**
@@ -44,6 +45,14 @@ public class ProcessInputs implements Iterable<ProcessInput> {
 
     public void addInput(ProcessInput input) {
         this.inputs.put(input.getID(), input);
+    }
+
+    public void addInput(OwsCodeType id, Data data) {
+        addInput(new DataProcessInput(id, data));
+    }
+
+    public void addInput(String id, Data data) {
+        addInput(new OwsCodeType(id), data);
     }
 
     public void addInputs(Iterable<? extends ProcessInput> inputs) {

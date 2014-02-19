@@ -15,12 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.data;
+package com.github.autermann.wps.streaming.data.output;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.streaming.data.Data;
 import com.google.common.collect.LinkedListMultimap;
 
 /**
@@ -28,7 +30,7 @@ import com.google.common.collect.LinkedListMultimap;
  *
  * @author Christian Autermann
  */
-public class ProcessOutputs {
+public class ProcessOutputs implements Iterable<ProcessOutput> {
 
     private final LinkedListMultimap<OwsCodeType, ProcessOutput> outputs
             = LinkedListMultimap.create();
@@ -53,4 +55,14 @@ public class ProcessOutputs {
         addOutput(new OwsCodeType(id), data);
     }
 
+    public void addOutputs(Iterable<? extends ProcessOutput> outputs) {
+        for (ProcessOutput output : outputs) {
+            addOutput(output);
+        }
+    }
+
+    @Override
+    public Iterator<ProcessOutput> iterator() {
+        return getOutputs().iterator();
+    }
 }

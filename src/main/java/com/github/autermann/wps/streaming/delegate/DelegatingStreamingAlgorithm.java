@@ -29,7 +29,7 @@ import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.MessageBroker;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 
 /**
  * TODO JavaDoc

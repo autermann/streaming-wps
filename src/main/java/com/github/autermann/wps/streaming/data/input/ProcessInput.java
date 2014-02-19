@@ -15,34 +15,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.data;
+package com.github.autermann.wps.streaming.data.input;
 
-import com.github.autermann.wps.commons.Identifiable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.commons.description.OwsCodeType;
-
+import com.github.autermann.wps.streaming.data.Data;
+import com.github.autermann.wps.streaming.message.MessageID;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public class ProcessOutput implements Identifiable<OwsCodeType> {
-    private final Data data;
+public abstract class ProcessInput implements Identifiable<OwsCodeType> {
     private final OwsCodeType id;
 
-    public ProcessOutput(OwsCodeType id, Data data) {
+    ProcessInput(OwsCodeType id) {
         this.id = checkNotNull(id);
-        this.data = checkNotNull(data);
     }
 
     @Override
     public OwsCodeType getID() {
         return this.id;
-    }
-
-    public Data getData() {
-        return data;
     }
 }

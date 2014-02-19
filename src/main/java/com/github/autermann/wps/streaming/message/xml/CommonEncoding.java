@@ -30,13 +30,18 @@ import org.apache.xmlbeans.XmlString;
 
 import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.streaming.data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.Data;
-import com.github.autermann.wps.streaming.data.Data.BoundingBoxData;
-import com.github.autermann.wps.streaming.data.Data.ComplexData;
-import com.github.autermann.wps.streaming.data.Data.ReferencedData;
-import com.github.autermann.wps.streaming.data.ProcessInput;
-import com.github.autermann.wps.streaming.data.ProcessInput.DataInput;
-import com.github.autermann.wps.streaming.data.ProcessOutput;
+import com.github.autermann.wps.streaming.data.BoundingBoxData;
+import com.github.autermann.wps.streaming.data.ComplexData;
+import com.github.autermann.wps.streaming.data.ComplexData;
+import com.github.autermann.wps.streaming.data.LiteralData;
+import com.github.autermann.wps.streaming.data.ReferencedData;
+import com.github.autermann.wps.streaming.data.ReferencedData;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInput;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
+import com.github.autermann.wps.streaming.data.output.ProcessOutput;
 
 /**
  * TODO JavaDoc
@@ -45,11 +50,11 @@ import com.github.autermann.wps.streaming.data.ProcessOutput;
  */
 public class CommonEncoding {
     public void encodeInput(InputType xbStreamingInput,
-                            ProcessInput.DataInput streamingInput)
+                            DataProcessInput streamingInput)
             throws XmlException {
         Data data = streamingInput.getData();
-        if (data instanceof Data.ReferencedData) {
-            ReferencedData referencedData = (Data.ReferencedData) data;
+        if (data instanceof ReferencedData) {
+            ReferencedData referencedData = (ReferencedData) data;
             xbStreamingInput.set(referencedData.getXml());
         } else {
             encodeData(xbStreamingInput.addNewData(), data);
@@ -62,11 +67,11 @@ public class CommonEncoding {
         OwsCodeType id = OwsCodeType.of(xbStreamingInput.getIdentifier());
         final Data data;
         if (xbStreamingInput.getReference() != null) {
-            data = new Data.ReferencedData(xbStreamingInput.getReference());
+            data = new ReferencedData(xbStreamingInput.getReference());
         } else {
             data = decodeData(xbStreamingInput.getData());
         }
-        return new DataInput(id, data);
+        return new DataProcessInput(id, data);
     }
 
     public Data decodeData(DataType xbData) throws XmlException {
@@ -74,17 +79,17 @@ public class CommonEncoding {
             throw new XmlException("Missing wps:Data");
         } else if (xbData.getLiteralData() != null) {
             LiteralDataType xbLiteralData = xbData.getLiteralData();
-            return new Data.LiteralData(xbLiteralData.getDataType(),
+            return new LiteralData(xbLiteralData.getDataType(),
                                         xbLiteralData.getStringValue(),
                                         xbLiteralData.getUom());
         } else if (xbData.getComplexData() != null) {
             ComplexDataType xbComplexData = xbData.getComplexData();
             String content = xbComplexData.xmlText();
             content = content.substring(content.indexOf('>') + 1, content.lastIndexOf("</"));
-            return new Data.ComplexData(Format.of(xbComplexData), content);
+            return new ComplexData(Format.of(xbComplexData), content);
         } else if (xbData.getBoundingBoxData() != null) {
             BoundingBoxType xbBoundingBoxData = xbData.getBoundingBoxData();
-            return new Data.BoundingBoxData(xbBoundingBoxData);
+            return new BoundingBoxData(xbBoundingBoxData);
         } else {
             throw new XmlException("Missing wps:LiteralData or wps:ComplexData or wps:BoundingBoxData");
         }
@@ -92,11 +97,11 @@ public class CommonEncoding {
 
     public void encodeData(DataType xbData, Data data)
             throws XmlException {
-        if (data instanceof Data.ComplexData) {
-            encodeComplexData(xbData, (Data.ComplexData) data);
-        } else if (data instanceof Data.LiteralData) {
-            encodeLiteralData(xbData, (Data.LiteralData) data);
-        } else if (data instanceof Data.BoundingBoxData) {
+        if (data instanceof ComplexData) {
+            encodeComplexData(xbData, (ComplexData) data);
+        } else if (data instanceof LiteralData) {
+            encodeLiteralData(xbData, (LiteralData) data);
+        } else if (data instanceof BoundingBoxData) {
             BoundingBoxData boundingBoxData = (BoundingBoxData) data;
             xbData.setBoundingBoxData(boundingBoxData.getXml());
         } else {
@@ -105,7 +110,7 @@ public class CommonEncoding {
     }
 
     private void encodeLiteralData(DataType xbData,
-                                   Data.LiteralData literalData) {
+                                   LiteralData literalData) {
         LiteralDataType xbLiteralData = xbData.addNewLiteralData();
         xbLiteralData.setDataType(literalData.getType());
         xbLiteralData.setStringValue(literalData.getValue());
@@ -115,7 +120,7 @@ public class CommonEncoding {
     }
 
     private void encodeComplexData(DataType xbData,
-                                   Data.ComplexData complexData)
+                                   ComplexData complexData)
             throws XmlException {
         ComplexDataType xbComplexData = xbData.addNewComplexData();
         xbComplexData.set(asXmlObject(complexData));

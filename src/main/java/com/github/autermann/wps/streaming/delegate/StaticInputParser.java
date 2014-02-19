@@ -26,7 +26,7 @@ import net.opengis.wps.x100.InputType;
 import org.apache.xmlbeans.XmlException;
 
 import com.github.autermann.wps.commons.Format;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
 import com.github.autermann.wps.streaming.xml.StaticInputsDocument;

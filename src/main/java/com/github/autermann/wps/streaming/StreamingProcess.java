@@ -34,14 +34,14 @@ public class StreamingProcess implements Identifiable<StreamingProcessID> {
 
     public StreamingProcess(ProcessConfiguration configuration) {
         this.configuration = checkNotNull(configuration);
-        StreamingProcessor messageProcessor = new StreamingProcessor();
-        this.fromClient = MessageReceivers.onlyOutgoingMessages(messageProcessor);
-        MessageReceiver callback = MessageReceivers.onlyIncomingMessages(messageProcessor);
+        StreamingProcessor processor = new StreamingProcessor();
+        this.fromClient = MessageReceivers.onlyOutgoingMessages(processor);
+        MessageReceiver callback = MessageReceivers.onlyIncomingMessages(processor);
         StreamingExecutor executor = new StreamingExecutor(
                 configuration.createExecutor(callback),
                 configuration.createThreadPool(),
                 configuration.createMessageRepository());
-        messageProcessor.setExecutor(executor);
+        processor.setExecutor(executor);
     }
 
     @Override

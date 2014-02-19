@@ -17,15 +17,6 @@
  */
 package com.github.autermann.wps.streaming.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.emptyToNull;
-
-import net.opengis.ows.x11.BoundingBoxType;
-import net.opengis.wps.x100.InputReferenceType;
-
-import com.github.autermann.wps.commons.Format;
-import com.google.common.base.Optional;
-
 /**
  * TODO JavaDoc
  *
@@ -33,77 +24,6 @@ import com.google.common.base.Optional;
  */
 public abstract class Data {
 
-    private Data() {
-    }
-
-    public static class BoundingBoxData extends Data {
-        private final BoundingBoxType xml;
-
-        public BoundingBoxData(BoundingBoxType xml) {
-            this.xml = checkNotNull(xml);
-        }
-
-        public BoundingBoxType getXml() {
-            return this.xml;
-        }
-
-    }
-
-    public static class ReferencedData extends Data {
-        private final InputReferenceType xml;
-
-        public ReferencedData(InputReferenceType xml) {
-            this.xml = checkNotNull(xml);
-        }
-
-        public InputReferenceType getXml() {
-            return xml;
-        }
-    }
-
-    public static class LiteralData extends Data {
-        private final String type;
-        private final String value;
-        private final Optional<String> uom;
-
-        public LiteralData(String type, String value, String uom) {
-            this.type = checkNotNull(type);
-            this.value = checkNotNull(emptyToNull(value));
-            this.uom = Optional.fromNullable(emptyToNull(uom));
-        }
-
-        public LiteralData(String type, String value) {
-            this(type, value, null);
-        }
-
-        public String getType() {
-            return this.type;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public Optional<String> getUom() {
-            return this.uom;
-        }
-    }
-
-    public static class ComplexData extends Data {
-        private final Format format;
-        private final String content;
-
-        public ComplexData(Format format, String content) {
-            this.format = checkNotNull(format);
-            this.content = checkNotNull(content);
-        }
-
-        public String getContent() {
-            return this.content;
-        }
-
-        public Format getFormat() {
-            return this.format;
-        }
+    Data() {
     }
 }

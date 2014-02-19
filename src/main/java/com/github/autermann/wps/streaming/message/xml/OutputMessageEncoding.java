@@ -24,8 +24,8 @@ import net.opengis.wps.x100.OutputDataType;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
-import com.github.autermann.wps.streaming.data.ProcessOutput;
-import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.data.output.ProcessOutput;
+import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.util.SoapConstants;
 import com.github.autermann.wps.streaming.xml.OutputMessageDocument;

@@ -24,7 +24,7 @@ import java.net.URI;
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.CallbackJobExecutor;
 import com.github.autermann.wps.streaming.ProcessConfiguration;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 
 /**

@@ -19,7 +19,7 @@ package com.github.autermann.wps.streaming.delegate;
 
 import org.n52.wps.io.data.IComplexData;
 
-import com.github.autermann.wps.streaming.data.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.google.common.base.Preconditions;
 
 /**

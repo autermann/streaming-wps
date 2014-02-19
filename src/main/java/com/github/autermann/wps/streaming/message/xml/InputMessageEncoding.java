@@ -25,9 +25,11 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
-import com.github.autermann.wps.streaming.data.ProcessInput;
-import com.github.autermann.wps.streaming.data.ProcessInput.ReferenceInput;
-import com.github.autermann.wps.streaming.data.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInput;
+import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
+import com.github.autermann.wps.streaming.data.input.ProcessInputs;
+import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.RelationshipType;
@@ -59,20 +61,20 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
         execute.addNewProcessID().setStringValue(sm.getProcessID().toString());
         InputsType inputs = execute.addNewInputs();
         for (ProcessInput in : payload.getInputs()) {
-            if (in instanceof ProcessInput.ReferenceInput) {
-                ReferenceInput input = (ProcessInput.ReferenceInput) in;
+            if (in instanceof ReferenceProcessInput) {
+                ReferenceProcessInput input = (ReferenceProcessInput) in;
                 MessageID messageId
                         = encodeReferenceInput(inputs.addNewReferenceInput(), input);
                 sm.addRelatedMessageID(RelationshipType.Needs, messageId);
-            } else if (in instanceof ProcessInput.DataInput) {
-                getCommonEncoding().encodeInput(inputs.addNewStreamingInput(), (ProcessInput.DataInput) in);
+            } else if (in instanceof DataProcessInput) {
+                getCommonEncoding().encodeInput(inputs.addNewStreamingInput(), (DataProcessInput) in);
             }
         }
         return doc;
     }
 
     private MessageID encodeReferenceInput(ReferenceInputType xbReferenceInput,
-                                           ProcessInput.ReferenceInput referenceInput) {
+                                           ReferenceProcessInput referenceInput) {
         referenceInput.getID().encodeTo(xbReferenceInput.addNewIdentifier());
         Reference xbReference = xbReferenceInput.addNewReference();
         MessageID referenced = referenceInput.getReferencedMessage();
@@ -123,7 +125,7 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
         if (!messageID.isPresent()) {
             throw new XmlException("Missing wsa:MessageID");
         }
-        return new ProcessInput.ReferenceInput(
+        return new ReferenceProcessInput(
                 inputID, messageID.get(), outputID);
     }
 

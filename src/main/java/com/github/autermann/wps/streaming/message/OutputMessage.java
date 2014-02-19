@@ -20,7 +20,7 @@ package com.github.autermann.wps.streaming.message;
 
 import java.net.URI;
 
-import com.github.autermann.wps.streaming.data.ProcessOutputs;
+import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**

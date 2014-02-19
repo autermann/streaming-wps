@@ -17,6 +17,8 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -32,7 +34,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
-import com.google.common.base.Preconditions;
 
 /**
  * TODO JavaDoc
@@ -48,7 +49,7 @@ public class HttpClientExecutor extends DelegatingExecutor {
     public HttpClientExecutor(MessageReceiver callback,
                               DelegatingProcessConfiguration configuration) {
         super(callback, configuration);
-        this.remoteURL = Preconditions.checkNotNull(configuration.getRemoteURL());
+        this.remoteURL = checkNotNull(configuration.getRemoteURL());
         this.client = createHttpClient();
     }
 
