@@ -101,8 +101,7 @@ public class ReferencedData extends Data {
         this.bodyReference = bodyReference;
         this.body = body;
         this.method = method;
-        this.headers
-                = headers == null ? HashMultimap.<String, String>create() : null;
+        this.headers = headers == null ? HashMultimap.<String, String>create() : headers;
         this.href = Preconditions.checkNotNull(href);
         this.format = format == null ? new Format(null, null, null) : format;
     }
