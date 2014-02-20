@@ -94,6 +94,17 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+            <groupId>org.n52.wps</groupId>
+            <artifactId>52n-wps-database</artifactId>
+            <version>${wps-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.n52.wps</groupId>
             <artifactId>52n-wps-commons</artifactId>
@@ -172,6 +183,11 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
             <version>${jetty-version}</version>
         </dependency>
         <dependency>

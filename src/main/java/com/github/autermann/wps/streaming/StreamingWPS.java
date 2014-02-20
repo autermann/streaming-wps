@@ -18,14 +18,17 @@
 package com.github.autermann.wps.streaming;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
+import javax.servlet.DispatcherType;
 import javax.websocket.Extension;
 import javax.websocket.server.ServerEndpointConfig;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
@@ -42,12 +45,14 @@ import com.github.autermann.wps.streaming.ws.StreamingSocketEndpoint;
  */
 public class StreamingWPS extends WPS {
 
-    public StreamingWPS(String host, int port) throws Exception {
+    public StreamingWPS(String host, int port)
+            throws Exception {
         super(host, port);
     }
 
     @Override
-    protected Server createServer(int port) throws Exception {
+    protected Server createServer(int port)
+            throws Exception {
         Server server = new Server(port);
         ServletContextHandler handler = new ServletContextHandler(
                 server, ROOT_CONTEXT,
@@ -57,21 +62,22 @@ public class StreamingWPS extends WPS {
         sc.addEndpoint(ServerEndpointConfig.Builder
                 .create(StreamingSocketEndpoint.class,
                         StreamingSocketEndpoint.PATH)
-                .configurator(new Configurator() {
-
-                    @Override
-                    public List<Extension> getNegotiatedExtensions(
-                            List<Extension> installed,
-                            List<Extension> requested) {
-                                return Collections.emptyList();
-                            }
-
-                }).build());
+                .configurator(new ExtensionLessConfigurator()).build());
         handler.addServlet(WebProcessingService.class,
                            WEB_PROCESSING_SERVICE_PATH);
         handler.addServlet(RetrieveResultServlet.class,
                            RETRIEVE_RESULT_SERVLET_PATH);
+        handler.addFilter(CrossOriginFilter.class, "/*",
+                          EnumSet.of(DispatcherType.REQUEST));
         return server;
+    }
+
+    private static class ExtensionLessConfigurator extends Configurator {
+        @Override
+        public List<Extension> getNegotiatedExtensions(
+                List<Extension> installed, List<Extension> requested) {
+            return Collections.emptyList();
+        }
     }
 
 }
