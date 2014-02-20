@@ -44,6 +44,7 @@ public abstract class SoapMessage implements Identifiable<MessageID> {
     private URI replyTo = WSAConstants.NONE_ADDRESS;
     private URI faultTo = WSAConstants.NONE_ADDRESS;
 
+    @Override
     public MessageID getID() {
         return messageId;
     }

@@ -28,5 +28,4 @@ import java.net.URI;
 public interface WSAConstants {
     URI ANONYMOUS_ADDRESS = URI.create("http://www.w3.org/2005/08/addressing/anonymous");
     URI NONE_ADDRESS = URI.create("http://www.w3.org/2005/08/addressing/none");
-    
 }
