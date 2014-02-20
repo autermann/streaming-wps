@@ -51,11 +51,9 @@ public class OutputMessageEncoding extends AbstractMessageEncoding<OutputMessage
 
     @Override
     protected XmlObject createBody(OutputMessage message) throws XmlException {
-        OutputMessageDocument document = OutputMessageDocument.Factory
-                .newInstance();
+        OutputMessageDocument document = OutputMessageDocument.Factory.newInstance();
         OutputMessageType xbOutputMessage = document.addNewOutputMessage();
-        xbOutputMessage.addNewProcessID().setStringValue(message.getProcessID()
-                .toString());
+        xbOutputMessage.addNewProcessID().setStringValue(message.getProcessID().toString());
         encodeOutputs(xbOutputMessage.addNewOutputs(), message.getPayload());
         return document;
     }

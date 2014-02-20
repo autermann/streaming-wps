@@ -68,6 +68,7 @@ public abstract class StreamingExecutor implements
             output.addRelatedMessages(RelationshipType.Used, dependencies);
             output.addRelatedMessage(RelationshipType.Reply, input);
             output.setPayload(outputs);
+            output.setProcessID(input.getProcessID());
             this.callback.receive(output);
             return output;
         } catch (StreamingError ex) {
