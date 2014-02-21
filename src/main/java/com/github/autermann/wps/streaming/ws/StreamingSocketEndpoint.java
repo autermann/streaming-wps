@@ -18,6 +18,7 @@
 package com.github.autermann.wps.streaming.ws;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EncodeException;
@@ -33,8 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.autermann.wps.streaming.MessageBroker;
-import com.github.autermann.wps.streaming.data.StreamingError;
-import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.Message;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 
@@ -73,12 +72,11 @@ public class StreamingSocketEndpoint implements MessageReceiver {
 
     @OnError
     public void onError(Throwable cause) {
-        log.info("Client session " + session.getId() + " errored", cause);
-        StreamingError error = new StreamingError("Error while processing message",
-                StreamingError.NO_APPLICABLE_CODE, cause);
-        ErrorMessage message = new ErrorMessage();
-        message.setPayload(error);
-        receive(message);
+        if (cause instanceof SocketTimeoutException) {
+            log.info("Client session {} timed out: {}", session.getId(), cause.getMessage());
+        } else {
+            log.info("Client session " + session.getId() + " errored", cause);
+        }
     }
 
     @Override
