@@ -111,6 +111,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
 
     private void stop()
             throws StreamingError {
+        log.debug("Stopping process {}", this.id);
         try {
             lock.lock();
             try {

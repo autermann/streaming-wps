@@ -76,7 +76,9 @@ public class ErrorMessageEncoding extends AbstractMessageEncoding<ErrorMessage> 
                                  StreamingError error) {
         if (error.getCause() != null) {
             ExceptionType xbException = xbErrorMessage.addNewException();
-            xbException.addExceptionText(error.getCause().getMessage());
+            if (error.getCause().getMessage() != null) {
+                xbException.addExceptionText(error.getCause().getMessage());
+            }
             xbException.addExceptionText(encodeStackTrace(error.getCause()));
             xbException.setExceptionCode(JAVA_ROOT_CAUSE_EXCEPTION_CODE);
         }
