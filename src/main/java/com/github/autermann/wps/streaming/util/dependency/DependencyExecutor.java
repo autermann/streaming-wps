@@ -477,8 +477,7 @@ public class DependencyExecutor<K, I, O> {
                         setOutputFailure(new NullPointerException());
                     } else {
                         if (shuttingDown && !complete) {
-                            log
-                                    .debug("[{}] Shutting done and should not complete", key);
+                            log.debug("[{}] Shutting done and should not complete", key);
                             setOutputFailure(new IllegalStateException());
                         } else {
                             executorService.submit(new Execution(in, out));
@@ -503,6 +502,7 @@ public class DependencyExecutor<K, I, O> {
             @Override
             public void run() {
                 try {
+                    log.debug("[{}] Executing", key);
                     setOutput(executor.execute(this.in, this.out));
                 } catch (Exception ex) {
                     setOutputFailure(ex);

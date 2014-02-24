@@ -25,6 +25,9 @@
 		</encoder>
 	</appender>
     <logger name="com.github.autermann" level="DEBUG" />
+	<logger name="org.n52.wps.server" level="OFF" />
+	<logger name="org.n52.wps.server.request.Execute" level="OFF" />
+	<logger name="com.github.autermann.wps.streaming.delegate.WPSClient" level="INFO" />
 	<root level="INFO">
 		<appender-ref ref="console" />
 	</root>

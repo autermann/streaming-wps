@@ -51,7 +51,7 @@ public class MessageBroker implements MessageReceiver{
 
     @Override
     public void receive(Message message) {
-        log.debug("Receiving message: {} for {}", message, message.getProcessID());
+        log.debug("Receiving client message: {} for {}", message, message.getProcessID());
         try {
             receive1(message);
         } catch (StreamingError ex) {

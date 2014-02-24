@@ -52,7 +52,6 @@ public abstract class Message extends SoapMessage {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("id", getID())
-                .add("action", getSOAPAction())
                 .add("process", getProcessID())
                 .toString();
 
