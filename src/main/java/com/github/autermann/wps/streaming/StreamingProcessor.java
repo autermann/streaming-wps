@@ -40,6 +40,7 @@ import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceivers;
 import com.github.autermann.wps.streaming.util.dependency.CyclicDependencyException;
 import com.github.autermann.wps.streaming.util.dependency.MissingInputException;
+import com.google.common.base.Joiner;
 
 /**
  * TODO JavaDoc
@@ -149,6 +150,10 @@ public class StreamingProcessor extends AbstractMessageReceiver {
         lock.lock();
         try {
             Set<MessageID> dependencies = message.getRelatedMessages(RelationshipType.Needs);
+            if (log.isInfoEnabled()) {
+                log.info("Receiving input message {} with dependencies {}",
+                         message.getID(), Joiner.on(", ").join(dependencies));
+            }
             executor.addJob(message.getID(), dependencies);
         } catch (CyclicDependencyException ex) {
             throw new StreamingError("Cyclic dependency", StreamingError.INVALID_PARAMETER_VALUE, ex);
@@ -157,6 +162,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
         } finally {
             lock.unlock();
         }
+        log.info("Setting input for {}", message.getID());
         executor.setInput(message.getID(), message);
     }
 

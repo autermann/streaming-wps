@@ -30,8 +30,8 @@ public class StreamingDependencyExecutor extends DependencyExecutor<MessageID, I
         implements Closeable {
 
     public StreamingDependencyExecutor(StreamingExecutor jobExecutor,
-                             ExecutorService executorService,
-                             MessageRepository repository) {
+                                       ExecutorService executorService,
+                                       MessageRepository repository) {
         super(jobExecutor, executorService, repository);
     }
 

@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ExecutionList;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,7 +35,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * @author Christian Autermann
  */
 public abstract class LoadableFuture<T> implements ListenableFuture<T> {
-
+    private static final Logger log = LoggerFactory.getLogger(LoadableFuture.class);
     private final ExecutionList listeners = new ExecutionList();
     private final Sync sync = new Sync();
 
@@ -42,7 +44,7 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
         if (!this.sync.cancel(mayInterruptIfRunning)) {
             return false;
         }
-        listeners.execute();
+        informListeners();
         return true;
     }
 
@@ -73,7 +75,7 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
     public boolean setAvailable() {
         boolean done = this.sync.setDone();
         if (done) {
-            this.listeners.execute();
+            informListeners();
         }
         return done;
     }
@@ -81,9 +83,14 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
     public boolean setFailure(Throwable t) {
         boolean done = this.sync.setException(t);
         if (done) {
-            this.listeners.execute();
+            informListeners();
         }
         return done;
+    }
+
+    private void informListeners() {
+        log.debug("Informing Listeners");
+        this.listeners.execute();
     }
 
     @Override
