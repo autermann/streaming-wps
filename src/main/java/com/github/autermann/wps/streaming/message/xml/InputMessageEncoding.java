@@ -27,7 +27,6 @@ import org.apache.xmlbeans.XmlObject;
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInput;
-import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.data.input.ReferenceProcessInput;
 import com.github.autermann.wps.streaming.message.InputMessage;
@@ -97,10 +96,10 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
         InputMessageDocument xbMessageDocument = (InputMessageDocument) body;
         InputMessageType xbInputMessage = xbMessageDocument.getInputMessage();
         message.setProcessID(decodeProcessID(xbInputMessage.getProcessID()));
-        message.setPayload(decodeInputs(xbInputMessage.getInputs()));
+        decodeInputs(message, xbInputMessage.getInputs());
     }
 
-    private ProcessInputs decodeInputs(InputsType xbInputs)
+    private void decodeInputs(InputMessage message, InputsType xbInputs)
             throws XmlException {
         ProcessInputs inputs = new ProcessInputs();
         if (xbInputs == null) {
@@ -108,15 +107,17 @@ public class InputMessageEncoding extends AbstractMessageEncoding<InputMessage> 
         }
         for (ReferenceInputType xbReferenceInput : xbInputs
                 .getReferenceInputArray()) {
-            inputs.addInput(decodeReferenceInput(xbReferenceInput));
+            ReferenceProcessInput ref = decodeReferenceInput(xbReferenceInput);
+            message.addRelatedMessageID(RelationshipType.Needs, ref.getReferencedMessage());
+            inputs.addInput(ref);
         }
         for (InputType xbStreamingInput : xbInputs.getStreamingInputArray()) {
             inputs.addInput(getCommonEncoding().decodeInput(xbStreamingInput));
         }
-        return inputs;
+        message.setPayload(inputs);
     }
 
-    private ProcessInput decodeReferenceInput(
+    private ReferenceProcessInput decodeReferenceInput(
             ReferenceInputType xbReferenceInput) throws XmlException {
         Reference ref = xbReferenceInput.getReference();
         OwsCodeType inputID = OwsCodeType.of(xbReferenceInput.getIdentifier());
