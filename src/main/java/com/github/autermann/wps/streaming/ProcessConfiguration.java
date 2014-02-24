@@ -52,7 +52,6 @@ public abstract class ProcessConfiguration {
     private static final String HTTP_SCHEME = "http";
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
-    private static final int THREADS = 10;
     private final URI socketURI;
     private final StreamingProcessID processId = StreamingProcessID.create();
     private ProcessInputs commonInputs = new ProcessInputs();
@@ -76,7 +75,7 @@ public abstract class ProcessConfiguration {
         String nameFormat = "streaming-process-" + getProcessID() + "-%d";
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat(nameFormat).build();
-        return Executors.newFixedThreadPool(THREADS, threadFactory);
+        return Executors.newCachedThreadPool(threadFactory);
     }
 
     public MessageRepository createMessageRepository() {
