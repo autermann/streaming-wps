@@ -53,8 +53,7 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
     public static final String INPUT_REMOTE_WPS_URL = "remote-wps-url";
     public static final String INPUT_STATIC_INPUTS = "static-inputs";
     public static final String OUTPUT_PROCESS_ID = "process-id";
-    public static final String OUTPUT_INPUT_SOCKET_URI = "input-socket-uri";
-    public static final String OUTPUT_OUTPUT_SOCKET_URI = "output-socket-uri";
+    public static final String OUTPUT_SOCKET_URI = "socket-uri";
 
     private final DelegatingProcessConfiguration configuration
             = new DelegatingProcessConfiguration();
@@ -104,21 +103,13 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
     }
 
     @LiteralDataOutput(
-            identifier = OUTPUT_INPUT_SOCKET_URI,
-            title = "The Input WebSocket URI",
-            abstrakt = "The WebSocket URI to supply subsequent inputs.",
+            identifier = OUTPUT_SOCKET_URI,
+            title = "The WebSocket URI",
+            abstrakt = "The WebSocket URI to supply subsequent inputs " +
+                       "and request intermediate outputs.",
             binding = LiteralAnyURIBinding.class)
     public URI getInputSocketURI() {
-        return this.configuration.getInputSocketURI();
-    }
-
-    @LiteralDataOutput(
-            identifier = OUTPUT_OUTPUT_SOCKET_URI,
-            title = "The Output WebSocket URI",
-            abstrakt = "The WebSocket URI to request outputs.",
-            binding = LiteralAnyURIBinding.class)
-    public URI getOutputSocketURI() {
-        return this.configuration.getOutputSocketURI();
+        return this.configuration.getSocketURI();
     }
 
     @Execute

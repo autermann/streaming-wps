@@ -51,10 +51,8 @@ public class ExecuteBuilder {
             = new OwsCodeType(DelegatingStreamingAlgorithm.INPUT_REMOTE_WPS_URL);
     public static final OwsCodeType INPUT_REMOTE_PROCESS_DESCRIPTION
             = new OwsCodeType(DelegatingStreamingAlgorithm.INPUT_REMOTE_PROCESS_DESCRIPTION);
-    public static final OwsCodeType OUTPUT_OUTPUT_SOCKET_URI
-            = new OwsCodeType(DelegatingStreamingAlgorithm.OUTPUT_OUTPUT_SOCKET_URI);
-    public static final OwsCodeType OUTPUT_INPUT_SOCKET_URI
-            = new OwsCodeType(DelegatingStreamingAlgorithm.OUTPUT_INPUT_SOCKET_URI);
+    public static final OwsCodeType OUTPUT_SOCKET_URI
+            = new OwsCodeType(DelegatingStreamingAlgorithm.OUTPUT_SOCKET_URI);
     public static final OwsCodeType OUTPUT_PROCESS_ID
             = new OwsCodeType(DelegatingStreamingAlgorithm.OUTPUT_PROCESS_ID);
     public static final String PARAMETER_IDENTIFIER = "identifier";
@@ -84,8 +82,7 @@ public class ExecuteBuilder {
              WPSClient client = new WPSClient(WPS_URL, httpClient)) {
             client.execute(processId, inputs,
                            Lists.newArrayList(OUTPUT_PROCESS_ID,
-                                              OUTPUT_INPUT_SOCKET_URI,
-                                              OUTPUT_OUTPUT_SOCKET_URI));
+                                              OUTPUT_SOCKET_URI));
         }
     }
 }

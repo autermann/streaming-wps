@@ -82,11 +82,7 @@ public abstract class ProcessConfiguration {
         return new DefaultMessageRepository();
     }
 
-    public URI getInputSocketURI() {
-        return this.socketURI;
-    }
-
-    public URI getOutputSocketURI() {
+    public URI getSocketURI() {
         return this.socketURI;
     }
 
