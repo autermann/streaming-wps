@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;
+import com.github.autermann.wps.streaming.message.Message;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.message.OutputRequestMessage;
@@ -82,7 +83,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
     @Override
     protected void receiveStop(StopMessage message) {
         try {
-            stop();
+            stop(message);
         } catch (StreamingError error) {
             error(error.toMessage(message), message.getReceiver());
         }
@@ -103,13 +104,13 @@ public class StreamingProcessor extends AbstractMessageReceiver {
         }
         toClients.receive(message);
         try {
-            stop();
+            stop(message);
         } catch (StreamingError ex) {
             log.error("Error stopping failed executor", ex);
         }
     }
 
-    private void stop()
+    private void stop(Message message)
             throws StreamingError {
         log.debug("Stopping process {}", this.id);
         try {
@@ -132,7 +133,15 @@ public class StreamingProcessor extends AbstractMessageReceiver {
                 log.error("Error closing JobExecutor", e);
             }
             MessageBroker.getInstance().removeProcess(this.id);
+            sendStopToClients(message);
         }
+    }
+
+    private void sendStopToClients(Message message) {
+        StopMessage stopMessage = new StopMessage();
+        stopMessage.setProcessID(this.id);
+        stopMessage.setRelatedMessage(RelationshipType.Reply, message);
+        toClients.receive(stopMessage);
     }
 
     private void input(InputMessage message)
