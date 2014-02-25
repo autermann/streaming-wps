@@ -52,12 +52,12 @@ import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.commons.description.ProcessOutputDescription;
 import com.github.autermann.wps.streaming.data.StreamingError;
+import com.github.autermann.wps.streaming.data.StreamingError.RemoteException;
 import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
 import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
-import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
@@ -124,24 +124,16 @@ public class WPSClient implements Closeable {
 
     private ExceptionReport decodeExceptionReport(
             ExceptionReportDocument document) {
-        ExceptionReportDocument.ExceptionReport xbExceptionReport = document
-                .getExceptionReport();
+        ExceptionReportDocument.ExceptionReport xbExceptionReport = document.getExceptionReport();
+        StreamingError ex = new StreamingError("Remote computation failed", StreamingError.REMOTE_COMPUTATION_ERROR);
         for (ExceptionType xbException : xbExceptionReport.getExceptionArray()) {
-            String code = xbException.getExceptionCode();
-            if (code == null ||
-                code.equals(ErrorMessageEncoding.JAVA_ROOT_CAUSE_EXCEPTION_CODE) ||
-                code
-                    .equals(ErrorMessageEncoding.JAVA_STACK_TRACE_EXCEPTION_CODE)) {
-                continue;
-            }
-            String message = null;
-            if (xbException.getExceptionTextArray().length > 0) {
-                message = xbException.getExceptionTextArray(0);
-            }
-            ExceptionReport ex = new ExceptionReport(message, code, xbException.getLocator());
-            return remoteComputationError("Remote computation failed", ex);
+            ex.addRemoteException(new RemoteException(
+                    xbException.getExceptionTextArray(),
+                    "RemoteException" + ((xbException.getExceptionCode() != null)
+                        ? xbException.getExceptionCode() : ""),
+                    xbException.getLocator()));
         }
-        return remoteComputationError("Can not parse ExceptionReport");
+        return ex;
     }
 
     public ProcessOutputs execute(ProcessDescription description, ProcessInputs inputs) throws ExceptionReport {

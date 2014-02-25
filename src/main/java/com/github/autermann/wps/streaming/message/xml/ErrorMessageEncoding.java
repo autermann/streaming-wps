@@ -27,6 +27,7 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
 import com.github.autermann.wps.streaming.data.StreamingError;
+import com.github.autermann.wps.streaming.data.StreamingError.RemoteException;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.util.SoapConstants;
 import com.github.autermann.wps.streaming.xml.ErrorMessageDocument;
@@ -69,7 +70,24 @@ public class ErrorMessageEncoding extends AbstractMessageEncoding<ErrorMessage> 
         if (error.getLocator() != null) {
             xbException.setLocator(error.getLocator());
         }
+        encodeRemoteExceptions(xbErrorMessage, error);
         return document;
+    }
+
+    private void encodeRemoteExceptions(ErrorMessageType xbErrorMessage,
+                                        StreamingError error) {
+        for (RemoteException re : error.getRemoteExceptions()) {
+            ExceptionType xbRe = xbErrorMessage.addNewException();
+            if (re.getCode() != null) {
+                xbRe.setExceptionCode(re.getCode());
+            }
+            if (re.getLocator() != null) {
+                xbRe.setLocator(re.getLocator());
+            }
+            for (String rem : re.getMessage()) {
+                xbRe.addExceptionText(rem);
+            }
+        }
     }
 
     private void encodeRootCause(ErrorMessageType xbErrorMessage,

@@ -17,6 +17,10 @@
  */
 package com.github.autermann.wps.streaming.data;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.streaming.message.ErrorMessage;
@@ -31,6 +35,7 @@ import com.github.autermann.wps.streaming.message.RelationshipType;
 public class StreamingError extends ExceptionReport {
     public static final String UNRESOLVABLE_INPUT = "UnresolvableInput";
     private static final long serialVersionUID = -7876931918796740783L;
+    private final List<RemoteException> additionalExceptions = new LinkedList<>();
 
     public StreamingError(String message, String errorKey) {
         super(message, errorKey);
@@ -63,5 +68,38 @@ public class StreamingError extends ExceptionReport {
         errorMessage.setProcessID(cause.getProcessID());
         errorMessage.addRelatedMessage(RelationshipType.Reply, cause);
         return errorMessage;
+    }
+
+    public StreamingError addRemoteException(RemoteException e) {
+        this.additionalExceptions.add(e);
+        return this;
+    }
+
+    public List<RemoteException> getRemoteExceptions() {
+        return Collections.unmodifiableList(additionalExceptions);
+    }
+
+    public static class RemoteException {
+        private final String[] message;
+        private final String locator;
+        private final String code;
+
+        public RemoteException(String[] message, String code, String locator) {
+            this.message = message;
+            this.locator = locator;
+            this.code = code;
+        }
+
+        public String[] getMessage() {
+            return message;
+        }
+
+        public String getLocator() {
+            return locator;
+        }
+
+        public String getCode() {
+            return code;
+        }
     }
 }

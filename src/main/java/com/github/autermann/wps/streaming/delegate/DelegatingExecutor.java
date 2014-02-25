@@ -65,6 +65,8 @@ public class DelegatingExecutor extends StreamingExecutor {
     protected ProcessOutputs execute(ProcessInputs inputs) throws StreamingError {
         try {
             return client.execute(description, inputs);
+        } catch(StreamingError ex) {
+            throw ex;
         } catch (ExceptionReport ex) {
             throw new StreamingError("Delegated process failed",
                     StreamingError.REMOTE_COMPUTATION_ERROR, ex);
