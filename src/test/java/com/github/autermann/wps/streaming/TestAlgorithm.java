@@ -23,28 +23,31 @@ import org.n52.wps.algorithm.annotation.LiteralDataInput;
 import org.n52.wps.algorithm.annotation.LiteralDataOutput;
 import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 
+import com.google.common.math.LongMath;
+
 @Algorithm(identifier = "com.github.autermann.wps.streaming.TestAlgorithm",
            version = "1.0.0")
 public class TestAlgorithm extends AbstractAnnotatedAlgorithm {
-    private int a, b, result;
+    private long a, b, result;
 
     @Execute
     public void execute() {
-        result = a + b;
+        //WPS does not support BigInteger/BigDecimal...
+        result = LongMath.checkedAdd(a, b);
     }
 
     @LiteralDataInput(identifier = "a")
-    public void setA(int a) {
+    public void setA(long a) {
         this.a = a;
     }
 
     @LiteralDataInput(identifier = "b")
-    public void setB(int b) {
+    public void setB(long b) {
         this.b = b;
     }
 
     @LiteralDataOutput(identifier = "result")
-    public int getResult() {
+    public long getResult() {
         return this.result;
     }
 }
