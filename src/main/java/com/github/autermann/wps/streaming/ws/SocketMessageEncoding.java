@@ -17,9 +17,6 @@
  */
 package com.github.autermann.wps.streaming.ws;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -47,7 +44,6 @@ import com.github.autermann.wps.streaming.message.xml.OutputRequestMessageEncodi
 import com.github.autermann.wps.streaming.message.xml.StopMessageEncoding;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.CharStreams;
 
 /**
  * TODO JavaDoc
@@ -55,8 +51,8 @@ import com.google.common.io.CharStreams;
  * @author Christian Autermann
  */
 public class SocketMessageEncoding
-        implements Encoder.TextStream<Message>,
-                   Decoder.TextStream<Message> {
+        implements Encoder.Text<Message>,
+                   Decoder.Text<Message> {
 
     private static final ImmutableMap<URI, MessageEncoding<?>> ENCODINGS;
 
@@ -82,9 +78,8 @@ public class SocketMessageEncoding
     }
 
     @Override
-    public Message decode(Reader reader)
-            throws DecodeException, IOException {
-        String string = CharStreams.toString(reader);
+    public Message decode(String string)
+            throws DecodeException {
         try {
             XmlObject xml = XmlObject.Factory.parse(string);
             if (!(xml instanceof EnvelopeDocument)) {
@@ -142,8 +137,8 @@ public class SocketMessageEncoding
     }
 
     @Override
-    public void encode(Message message, Writer writer)
-            throws EncodeException, IOException {
+    public String encode(Message message)
+            throws EncodeException {
         try {
             @SuppressWarnings("unchecked")
             MessageEncoding<Message> encoder
@@ -152,11 +147,15 @@ public class SocketMessageEncoding
             if (encoder == null) {
                 throw new EncodeException(message, "Unknown action");
             }
-            writer.write(encoder.encode(message));
-            writer.flush();
+            return encoder.encode(message);
         } catch (XmlException ex) {
             throw new EncodeException(message, "Unable to encode message", ex);
         }
 
+    }
+
+    @Override
+    public boolean willDecode(String s) {
+        return true;
     }
 }
