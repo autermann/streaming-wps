@@ -41,7 +41,7 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-        if (!this.sync.cancel(mayInterruptIfRunning)) {
+        if (!sync.cancel()) {
             return false;
         }
         informListeners();
@@ -72,7 +72,7 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
         return load();
     }
 
-    public boolean setAvailable() {
+    protected boolean setAvailable() {
         boolean done = this.sync.setDone();
         if (done) {
             informListeners();
@@ -80,7 +80,7 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
         return done;
     }
 
-    public boolean setFailure(Throwable t) {
+    protected boolean setFailure(Throwable t) {
         boolean done = this.sync.setException(t);
         if (done) {
             informListeners();
@@ -100,13 +100,12 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
 
     protected abstract T load();
 
-    private class Sync extends AbstractQueuedSynchronizer {
+    private static class Sync extends AbstractQueuedSynchronizer {
         private static final long serialVersionUID = 2593493634180807289L;
         private static final int RUNNING = 0;
         private static final int COMPLETING = 1;
         private static final int COMPLETED = 2;
         private static final int CANCELLED = 4;
-        private static final int INTERRUPTED = 8;
         private Throwable exception;
 
         @Override
@@ -138,22 +137,17 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
             check();
         }
 
-        private void check()
+        void check()
                 throws CancellationException, ExecutionException {
             int state = getState();
             switch (state) {
                 case COMPLETED:
                     if (exception != null) {
                         throw new ExecutionException(exception);
-                    } else {
-                        return;
                     }
+                    break;
                 case CANCELLED:
-                case INTERRUPTED:
-                    CancellationException ee
-                            = new CancellationException("Task was cancelled.");
-                    ee.initCause(ee);
-                    throw ee;
+                    throw new CancellationException("Task was cancelled.");
                 default:
                     throw new IllegalStateException("Error, synchronizer in invalid state: " +
                                                     state);
@@ -161,15 +155,11 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
         }
 
         boolean isDone() {
-            return (getState() & (COMPLETED | CANCELLED | INTERRUPTED)) != 0;
+            return (getState() & (COMPLETED | CANCELLED)) != 0;
         }
 
         boolean isCancelled() {
-            return (getState() & (CANCELLED | INTERRUPTED)) != 0;
-        }
-
-        boolean wasInterrupted() {
-            return getState() == INTERRUPTED;
+            return getState() == CANCELLED;
         }
 
         boolean setDone() {
@@ -180,19 +170,14 @@ public abstract class LoadableFuture<T> implements ListenableFuture<T> {
             return complete(t, COMPLETED);
         }
 
-        boolean cancel(boolean interrupt) {
-            return complete(null, interrupt ? INTERRUPTED : CANCELLED);
+        boolean cancel() {
+            return complete(null, CANCELLED);
         }
 
         private boolean complete(Throwable t, int finalState) {
             boolean doCompletion = compareAndSetState(RUNNING, COMPLETING);
             if (doCompletion) {
-                if ((finalState & (CANCELLED | INTERRUPTED)) != 0) {
-                    this.exception
-                            = new CancellationException("Future.cancel() was called.");
-                } else {
-                    this.exception = t;
-                }
+                this.exception = t;
                 releaseShared(finalState);
             } else if (getState() == COMPLETING) {
                 acquireShared(-1);

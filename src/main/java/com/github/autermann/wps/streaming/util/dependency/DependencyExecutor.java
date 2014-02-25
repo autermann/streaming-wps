@@ -58,18 +58,13 @@ public class DependencyExecutor<K, I, O> {
     private final Map<K, Job> jobs = Maps.newHashMap();
     private final ExecutorService executorService;
     private final JobExecutor<I, O> executor;
-    private int waiting = 0;
-    private int running = 0;
-    private int size = 0;
-    private int success = 0;
-    private int failure = 0;
-    private int needsInput = 0;
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition done = lock.newCondition();
     private final Condition empty = lock.newCondition();
     private volatile boolean shuttingDown = false;
-    private volatile boolean complete = true;
+    private volatile boolean shouldComplete = true;
     private final Repository<K, I, O> repository;
+    private final Stats stats = new Stats();
 
     public DependencyExecutor(JobExecutor<I, O> jobExecutor,
                               ExecutorService executorService,
@@ -79,7 +74,7 @@ public class DependencyExecutor<K, I, O> {
         this.repository = Preconditions.checkNotNull(repository);
     }
 
-    public void shutdown(boolean complete)
+    public void shutdown(boolean shouldComplete)
             throws InterruptedException, MissingInputException {
         this.lock.lock();
         try {
@@ -87,74 +82,21 @@ public class DependencyExecutor<K, I, O> {
                 throw new IllegalStateException();
             }
             this.shuttingDown = true;
-            this.complete = complete;
+            this.shouldComplete = shouldComplete;
 
-            if (this.complete) {
-                if (this.needsInput != 0) {
+            if (this.shouldComplete) {
+                if (this.stats.jobsWaitingForInput() != 0) {
                     throw new MissingInputException();
                 }
-                while (!isEmpty()) {
+                while (!this.stats.isEmpty()) {
                     empty.await();
                 }
             } else {
-                while (!isDone()) {
+                while (!this.stats.isDone()) {
                     done.await();
                 }
             }
             this.executorService.shutdown();
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    private boolean isEmpty() {
-        return this.success + this.failure == this.size;
-    }
-
-    private boolean isDone() {
-        return this.success + this.failure + this.running == this.size;
-    }
-
-    public int getSuccess() {
-        this.lock.lock();
-        try {
-            return this.success;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int getFailure() {
-        this.lock.lock();
-        try {
-            return this.failure;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int getSize() {
-        this.lock.lock();
-        try {
-            return this.size;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int getWaiting() {
-        this.lock.lock();
-        try {
-            return this.waiting;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int getExecuting() {
-        this.lock.lock();
-        try {
-            return this.waiting;
         } finally {
             this.lock.unlock();
         }
@@ -207,8 +149,7 @@ public class DependencyExecutor<K, I, O> {
                 rollback(addedEdges, addedNodes);
                 throw ex;
             }
-            this.size += addedNodes.size();
-            this.needsInput += addedNodes.size();
+            this.stats.onNewJobs(addedNodes.size());
             job.setDependencies(deps);
         } finally {
             this.lock.unlock();
@@ -232,7 +173,7 @@ public class DependencyExecutor<K, I, O> {
                 throw new NoSuchElementException("No such job: " + key);
             }
             job.setInput(input);
-            --this.needsInput;
+            this.stats.onInput();
         } finally {
             this.lock.unlock();
         }
@@ -249,42 +190,9 @@ public class DependencyExecutor<K, I, O> {
     private void changeState(State from, State to) {
         this.lock.lock();
         try {
-            if (from != null) {
-                switch (from) {
-                    case SUCCESS:
-                        --this.success;
-                        break;
-                    case FAILURE:
-                        --this.failure;
-                        break;
-                    case RUNNING:
-                        --this.running;
-                        break;
-                    case WAITING:
-                        --this.waiting;
-                        break;
-                }
-            }
-            switch (to) {
-                case SUCCESS:
-                    ++this.success;
-                    break;
-                case FAILURE:
-                    ++this.failure;
-                    break;
-                case RUNNING:
-                    ++this.running;
-                    break;
-                case WAITING:
-                    ++this.waiting;
-                    break;
-            }
-            if (isDone()) {
-                this.done.signalAll();
-            }
-            if (isEmpty()) {
-                this.empty.signalAll();
-            }
+            this.stats.onJobStateChange(from, to);
+            if (this.stats.isDone()) { this.done.signalAll(); }
+            if (this.stats.isEmpty()) { this.empty.signalAll(); }
         } finally {
             this.lock.unlock();
         }
@@ -292,8 +200,76 @@ public class DependencyExecutor<K, I, O> {
 
     @Override
     public String toString() {
-        lock.lock();
-        try {
+        return Objects.toStringHelper(this).addValue(this.stats).toString();
+    }
+
+    private static class Stats {
+        private int waiting = 0;
+        private int running = 0;
+        private int size = 0;
+        private int success = 0;
+        private int failure = 0;
+        private int needsInput = 0;
+
+        int waiting() {
+            return waiting;
+        }
+
+        int running() {
+            return running;
+        }
+
+        int size() {
+            return size;
+        }
+
+        int succeeded() {
+            return success;
+        }
+
+        int failed() {
+            return failure;
+        }
+
+        int jobsWaitingForInput() {
+            return needsInput;
+        }
+
+        boolean isEmpty() {
+            return this.success + this.failure == this.size;
+        }
+
+        boolean isDone() {
+            return this.success + this.failure + this.running == this.size;
+        }
+
+        void onJobStateChange(State from, State to) {
+            if (from != null) {
+                increase(from, -1);
+            }
+            increase(to, 1);
+        }
+
+         private void increase(State to, int amount) {
+            switch (to) {
+                case SUCCESS: this.success += amount; break;
+                case FAILURE: this.failure += amount; break;
+                case RUNNING: this.running += amount; break;
+                case WAITING: this.waiting += amount; break;
+            }
+        }
+
+        void onInput() {
+            --this.needsInput;
+        }
+
+        void onNewJobs(int jobs) {
+            this.size += jobs;
+            this.needsInput += jobs;
+        }
+
+        @Override
+        public String toString() {
             return Objects.toStringHelper(this)
                     .add("size", this.size)
                     .add("success", this.success)
@@ -301,8 +277,6 @@ public class DependencyExecutor<K, I, O> {
                     .add("waiting", this.waiting)
                     .add("running", this.running)
                     .toString();
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -419,6 +393,7 @@ public class DependencyExecutor<K, I, O> {
             try {
                 checkState(State.WAITING);
                 this.dependencies = asFuture(dependencies);
+                log.debug("[{}] Adding dependency listener", this);
                 this.dependencies.addListener(new Runnable() {
                     @Override public void run() {
                         log.debug("[{}] Dependency listener executed", Job.this);
@@ -476,7 +451,7 @@ public class DependencyExecutor<K, I, O> {
         public void run() {
             log.debug("[{}] Executing", job);
             try {
-                if (shuttingDown && !complete) {
+                if (shuttingDown && !shouldComplete) {
                     log.debug("[{}] Shutting done and should not complete", job);
                     job.fail(new IllegalStateException("Shutting done and should not complete"));
                     return;
