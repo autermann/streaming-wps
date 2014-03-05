@@ -86,7 +86,9 @@ public abstract class ProcessConfiguration {
         return this.socketURI;
     }
 
-    private URI createSocketURI() {
+    public abstract StreamingExecutor createStreamingExecutor(MessageReceiver callback);
+
+    private static URI createSocketURI() {
         try {
             String wpsEndpoint = CapabilitiesConfiguration.ENDPOINT_URL;
             URIBuilder builder = new URIBuilder(wpsEndpoint);
@@ -116,8 +118,6 @@ public abstract class ProcessConfiguration {
             return URI.create("ws://localhost:8080/streaming");
         }
     }
-
-    public abstract StreamingExecutor createStreamingExecutor(MessageReceiver callback);
 
     /**
      * Normalizes a path by returning {@code null} for {@code null}, {@code /}

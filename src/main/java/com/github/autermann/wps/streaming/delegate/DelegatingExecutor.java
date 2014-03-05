@@ -32,7 +32,9 @@ import com.github.autermann.wps.streaming.StreamingExecutor;
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.data.output.ProcessOutputs;
+import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
+import com.google.common.base.Optional;
 
 /**
  * TODO JavaDoc
@@ -62,14 +64,19 @@ public class DelegatingExecutor extends StreamingExecutor {
     }
 
     @Override
-    protected ProcessOutputs execute(ProcessInputs inputs) throws StreamingError {
+    protected Optional<ProcessOutputs> execute(ProcessInputs inputs) throws StreamingError {
         try {
-            return client.execute(description, inputs);
+            return Optional.of(client.execute(description, inputs));
         } catch(StreamingError ex) {
             throw ex;
         } catch (ExceptionReport ex) {
             throw new StreamingError("Delegated process failed",
                     StreamingError.REMOTE_COMPUTATION_ERROR, ex);
         }
+    }
+
+    @Override
+    protected Optional<OutputMessage> onStop() throws StreamingError {
+        return Optional.absent();
     }
 }

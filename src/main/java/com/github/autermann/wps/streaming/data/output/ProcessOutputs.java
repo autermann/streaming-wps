@@ -23,7 +23,9 @@ import java.util.List;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 
 /**
  * TODO JavaDoc
@@ -31,12 +33,21 @@ import com.google.common.collect.LinkedListMultimap;
  * @author Christian Autermann
  */
 public class ProcessOutputs implements Iterable<ProcessOutput> {
+    private static final ProcessOutputs NONE
+            = new ProcessOutputs(ImmutableListMultimap.<OwsCodeType, ProcessOutput>of());
 
-    private final LinkedListMultimap<OwsCodeType, ProcessOutput> outputs
-            = LinkedListMultimap.create();
+    private final ListMultimap<OwsCodeType, ProcessOutput> outputs;
+
+    public ProcessOutputs() {
+        this(LinkedListMultimap.<OwsCodeType, ProcessOutput>create());
+    }
+
+    private ProcessOutputs(ListMultimap<OwsCodeType, ProcessOutput> outputs) {
+        this.outputs = outputs;
+    }
 
     public List<ProcessOutput> getOutputs() {
-        return Collections.unmodifiableList(outputs.values());
+        return Collections.unmodifiableList((List<ProcessOutput>) outputs.values());
     }
 
     public List<ProcessOutput> getOutputs(OwsCodeType outputId) {
@@ -56,12 +67,12 @@ public class ProcessOutputs implements Iterable<ProcessOutput> {
         return addOutput(new OwsCodeType(id), data);
     }
 
-    public ProcessOutputs addOutputs(ProcessOutputs outputs) {
-        if (outputs != this) {
-            addOutputs(outputs.getOutputs());
+        public ProcessOutputs addOutputs(ProcessOutputs outputs) {
+            if (outputs != this) {
+                addOutputs(outputs.getOutputs());
+            }
+            return this;
         }
-        return this;
-    }
 
     public ProcessOutputs addOutputs(Iterable<? extends ProcessOutput> outputs) {
         for (ProcessOutput output : outputs) {
@@ -73,5 +84,9 @@ public class ProcessOutputs implements Iterable<ProcessOutput> {
     @Override
     public Iterator<ProcessOutput> iterator() {
         return getOutputs().iterator();
+    }
+
+    public static ProcessOutputs none() {
+        return NONE;
     }
 }

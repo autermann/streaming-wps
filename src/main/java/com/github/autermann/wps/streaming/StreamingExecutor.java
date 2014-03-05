@@ -38,6 +38,7 @@ import com.github.autermann.wps.streaming.message.OutputMessage;
 import com.github.autermann.wps.streaming.message.RelationshipType;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.util.dependency.JobExecutor;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
@@ -50,11 +51,13 @@ public abstract class StreamingExecutor implements
         JobExecutor<InputMessage, OutputMessage>, Closeable {
     private final MessageReceiver callback;
     private final ProcessInputs commonInputs;
+    private final StreamingProcessID id;
 
     public StreamingExecutor(MessageReceiver callback,
                              ProcessConfiguration configuration) {
         this.callback = checkNotNull(callback);
         this.commonInputs = checkNotNull(configuration.getStaticInputs());
+        this.id = checkNotNull(configuration.getProcessID());
     }
 
     @Override
@@ -62,14 +65,16 @@ public abstract class StreamingExecutor implements
             InputMessage input, Iterable<OutputMessage> dependencies)
             throws StreamingError {
         try {
-            ProcessInputs inputs = createInputs(input, dependencies);
-            ProcessOutputs outputs = execute(inputs);
+            ProcessInputs inputs = resolve(dependencies, input);
+            Optional<ProcessOutputs> outputs = execute(inputs);
             OutputMessage output = new OutputMessage();
-            output.addRelatedMessages(RelationshipType.Used, dependencies);
+            addProvenance(output, dependencies);
             output.addRelatedMessage(RelationshipType.Reply, input);
-            output.setPayload(outputs);
-            output.setProcessID(input.getProcessID());
-            this.callback.receive(output);
+            output.setPayload(outputs.or(ProcessOutputs.none()));
+            output.setProcessID(this.id);
+            if (outputs.isPresent()) {
+                this.callback.receive(output);
+            }
             return output;
         } catch (StreamingError ex) {
             this.callback.receive(ex.toMessage(input));
@@ -77,28 +82,35 @@ public abstract class StreamingExecutor implements
         }
     }
 
-    private ProcessInputs createInputs(InputMessage inputMessage,
-                                       Iterable<OutputMessage> outputMessages)
-            throws StreamingError {
-        try {
-            Dependencies dependencies = new Dependencies(outputMessages);
-            ProcessInputs inputs = new ProcessInputs().addInputs(commonInputs);
-            for (ProcessInput input : inputMessage.getPayload()) {
-                if (input instanceof DataProcessInput) {
-                    inputs.addInput(input);
-                } else if (input instanceof ReferenceProcessInput) {
-                    inputs.addInputs(dependencies.resolve((ReferenceProcessInput) input));
-                }
-            }
-            return inputs;
-        } catch (UnresolvableInputException e) {
-            throw new StreamingError("ReferenceInput can not be resolved",
-                                     StreamingError.UNRESOLVABLE_INPUT, e);
+    private void addProvenance(OutputMessage output, Iterable<OutputMessage> dependencies) {
+        for (OutputMessage message : dependencies) {
+            output.addRelatedMessageID(RelationshipType.Used, message.getID());
+            output.addRelatedMessageIDs(RelationshipType.Used, message.getRelatedMessages(RelationshipType.Used));
         }
     }
 
-    protected abstract ProcessOutputs execute(ProcessInputs inputs)
+    private ProcessInputs resolve(Iterable<OutputMessage> dependencyMessages,
+                                  InputMessage input) throws StreamingError {
+        try {
+            Dependencies dependencies = new Dependencies(dependencyMessages);
+            return dependencies.resolve(input.getPayload()).addInputs(commonInputs);
+        } catch (UnresolvableInputException ex) {
+            throw new StreamingError("ReferenceInput can not be resolved",
+                                     StreamingError.UNRESOLVABLE_INPUT, ex);
+        }
+    }
+
+    protected abstract Optional<ProcessOutputs> execute(ProcessInputs inputs)
             throws StreamingError;
+
+    public void finish() throws StreamingError {
+        Optional<OutputMessage> finish = onStop();
+        if (finish.isPresent()) {
+            this.callback.receive(finish.get());
+        }
+    }
+
+    protected abstract Optional<OutputMessage> onStop() throws StreamingError;
 
     private static class Dependencies {
         private final Map<MessageID, OutputMessage> messages;
@@ -106,6 +118,19 @@ public abstract class StreamingExecutor implements
         Dependencies(Iterable<OutputMessage> dependencies)
                 throws UnresolvableInputException {
             this.messages = buildMap(dependencies);
+        }
+
+        public ProcessInputs resolve(ProcessInputs inputs)
+                throws UnresolvableInputException {
+            ProcessInputs resolved = new ProcessInputs();
+            for (ProcessInput input : inputs) {
+                if (input instanceof DataProcessInput) {
+                    inputs.addInput(input);
+                } else if (input instanceof ReferenceProcessInput) {
+                    inputs.addInputs(resolve((ReferenceProcessInput) input));
+                }
+            }
+            return resolved;
         }
 
         Iterable<? extends ProcessInput> resolve(ReferenceProcessInput input)

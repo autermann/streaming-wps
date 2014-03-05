@@ -21,6 +21,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.github.autermann.wps.streaming.message.OutputMessage;
@@ -28,6 +32,8 @@ import com.github.autermann.wps.streaming.util.dependency.DependencyExecutor;
 
 public class StreamingDependencyExecutor extends DependencyExecutor<MessageID, InputMessage, OutputMessage>
         implements Closeable {
+    private static final Logger log = LoggerFactory
+            .getLogger(StreamingDependencyExecutor.class);
 
     public StreamingDependencyExecutor(StreamingExecutor jobExecutor,
                                        ExecutorService executorService,
@@ -36,8 +42,17 @@ public class StreamingDependencyExecutor extends DependencyExecutor<MessageID, I
     }
 
     @Override
+    public StreamingExecutor getExecutor() {
+        return (StreamingExecutor) super.getExecutor();
+    }
+
+    public void finish() throws StreamingError {
+        getExecutor().onStop();
+    }
+
+    @Override
     public void close() throws IOException {
-        ((StreamingExecutor) getExecutor()).close();
+        getExecutor().close();
     }
 
 }

@@ -59,7 +59,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
     }
 
     public StreamingDependencyExecutor getExecutor() {
-        return executor;
+        return this.executor;
     }
 
     public void setExecutor(StreamingDependencyExecutor executor) {
@@ -73,12 +73,12 @@ public class StreamingProcessor extends AbstractMessageReceiver {
 
     @Override
     protected void receiveOutputRequest(OutputRequestMessage message) {
-        toClients.bind(message.getReceiver());
+        this.toClients.bind(message.getReceiver());
     }
 
     @Override
     protected void receiveOutput(OutputMessage message) {
-        toClients.receive(message);
+        this.toClients.receive(message);
     }
 
     @Override
@@ -100,10 +100,10 @@ public class StreamingProcessor extends AbstractMessageReceiver {
     }
 
     private void error(ErrorMessage message, MessageReceiver cause) {
-        if (!toClients.contains(cause)) {
+        if (!this.toClients.contains(cause)) {
             cause.receive(message);
         }
-        toClients.receive(message);
+        this.toClients.receive(message);
         try {
             stop(message);
         } catch (StreamingError ex) {
@@ -115,11 +115,14 @@ public class StreamingProcessor extends AbstractMessageReceiver {
             throws StreamingError {
         log.debug("Stopping process {}", this.id);
         try {
-            lock.lock();
+            this.lock.lock();
             try {
                 executor.shutdown(true);
             } finally {
-                lock.unlock();
+                this.lock.unlock();
+            }
+            if (!(message instanceof ErrorMessage)) {
+                getExecutor().finish();
             }
         } catch (InterruptedException ex) {
             throw new StreamingError("Computation could not complete", StreamingError.NO_APPLICABLE_CODE, ex);
@@ -128,21 +131,19 @@ public class StreamingProcessor extends AbstractMessageReceiver {
         } catch (IllegalStateException ex) {
             throw new StreamingError("Process is shutting down", StreamingError.NO_APPLICABLE_CODE, ex);
         } finally {
+
             try {
                 executor.close();
             } catch (IOException e) {
-                log.error("Error closing JobExecutor", e);
+                log.error("Error closing StreamingExecutor", e);
             }
-            MessageBroker.getInstance().removeProcess(this.id);
-            sendStopToClients(message);
-        }
-    }
 
-    private void sendStopToClients(Message message) {
-        StopMessage stopMessage = new StopMessage();
-        stopMessage.setProcessID(this.id);
-        stopMessage.setRelatedMessage(RelationshipType.Reply, message);
-        toClients.receive(stopMessage);
+            MessageBroker.getInstance().removeProcess(this.id);
+            StopMessage stopMessage = new StopMessage();
+            stopMessage.setProcessID(this.id);
+            stopMessage.setRelatedMessage(RelationshipType.Reply, message);
+            toClients.receive(stopMessage);
+        }
     }
 
     private void input(InputMessage message)
