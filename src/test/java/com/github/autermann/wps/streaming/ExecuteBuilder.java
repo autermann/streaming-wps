@@ -17,6 +17,7 @@
  */
 package com.github.autermann.wps.streaming;
 
+import com.github.autermann.wps.streaming.example.AddAlgorithm;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -75,7 +76,7 @@ public class ExecuteBuilder {
                 .addParameter(PARAMETER_SERVICE, SERVICE_TYPE_WPS)
                 .addParameter(PARAMETER_VERSION, SERVICE_VERSION_100)
                 .addParameter(PARAMETER_REQUEST, OPERATION_DESCRIBE_PROCESS)
-                .addParameter(PARAMETER_IDENTIFIER, TestAlgorithm.class.getName())
+                .addParameter(PARAMETER_IDENTIFIER, AddAlgorithm.class.getName())
                 .build(), PROCESS_DESCRIPTION_FORMAT));
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();

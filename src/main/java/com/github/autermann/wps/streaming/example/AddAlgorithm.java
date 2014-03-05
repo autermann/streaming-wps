@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming;
+package com.github.autermann.wps.streaming.example;
 
 import org.n52.wps.algorithm.annotation.Algorithm;
 import org.n52.wps.algorithm.annotation.Execute;
@@ -25,9 +25,9 @@ import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 
 import com.google.common.math.LongMath;
 
-@Algorithm(identifier = "com.github.autermann.wps.streaming.TestAlgorithm",
+@Algorithm(identifier = "com.github.autermann.wps.streaming.example.AddAlgorithm",
            version = "1.0.0")
-public class TestAlgorithm extends AbstractAnnotatedAlgorithm {
+public class AddAlgorithm extends AbstractAnnotatedAlgorithm {
     private long a, b, result;
 
     @Execute
