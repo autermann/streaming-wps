@@ -67,4 +67,13 @@ public class ReferenceProcessInput extends ProcessInput {
         return this.iteration;
     }
 
+    @Override
+    public boolean isReference() {
+        return true;
+    }
+
+    @Override
+    public ReferenceProcessInput asReference() {
+        return this;
+    }
 }

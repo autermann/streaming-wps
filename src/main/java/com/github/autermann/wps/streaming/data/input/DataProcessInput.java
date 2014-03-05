@@ -43,4 +43,15 @@ public class DataProcessInput extends ProcessInput {
         return this.data;
     }
 
+    @Override
+    public boolean isData() {
+        return true;
+    }
+
+    @Override
+    public DataProcessInput asData() {
+        return this;
+    }
+
+
 }

@@ -38,4 +38,14 @@ public class BoundingBoxData extends Data {
         return this.xml;
     }
 
+    @Override
+    public BoundingBoxData asBoundingBox() {
+        return this;
+    }
+
+    @Override
+    public boolean isBoundingBox() {
+        return true;
+    }
+
 }

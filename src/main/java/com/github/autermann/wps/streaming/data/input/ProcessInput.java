@@ -21,8 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.commons.description.OwsCodeType;
-import com.github.autermann.wps.streaming.data.Data;
-import com.github.autermann.wps.streaming.message.MessageID;
 
 /**
  * TODO JavaDoc
@@ -39,5 +37,21 @@ public abstract class ProcessInput implements Identifiable<OwsCodeType> {
     @Override
     public OwsCodeType getID() {
         return this.id;
+    }
+
+    public boolean isData() {
+        return false;
+    }
+
+    public boolean isReference() {
+        return false;
+    }
+
+    public DataProcessInput asData() {
+        throw new UnsupportedOperationException();
+    }
+
+    public ReferenceProcessInput asReference() {
+        throw new UnsupportedOperationException();
     }
 }

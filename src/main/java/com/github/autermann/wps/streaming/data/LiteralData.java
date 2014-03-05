@@ -72,6 +72,123 @@ public class LiteralData extends Data {
         return this.uom;
     }
 
+    @Override
+    public boolean isLiteral() {
+        return true;
+    }
+
+    @Override
+    public LiteralData asLiteral() {
+        return this;
+    }
+
+    public boolean isBoolean() {
+        return getType().equalsIgnoreCase(XS_BOOLEAN);
+    }
+
+    public boolean isByte() {
+        return getType().equalsIgnoreCase(XS_BYTE);
+    }
+
+    public boolean isShort() {
+        return getType().equalsIgnoreCase(XS_SHORT);
+    }
+
+    public boolean isInteger() {
+        return getType().equalsIgnoreCase(XS_INTEGER);
+    }
+
+    public boolean isInt() {
+        return getType().equalsIgnoreCase(XS_INT);
+    }
+
+    public boolean isLong() {
+        return getType().equalsIgnoreCase(XS_LONG);
+    }
+
+    public boolean isDouble() {
+        return getType().equalsIgnoreCase(XS_DOUBLE);
+    }
+
+    public boolean isFloat() {
+        return getType().equalsIgnoreCase(XS_FLOAT);
+    }
+
+    public boolean isString() {
+        return getType().equalsIgnoreCase(XS_STRING);
+    }
+
+    public boolean isAnyURI() {
+        return getType().equalsIgnoreCase(XS_ANY_URI);
+    }
+
+    public boolean isBase64Binary() {
+        return getType().equalsIgnoreCase(XS_BASE64_BINARY);
+    }
+
+    public boolean isDecimal() {
+        return getType().equalsIgnoreCase(XS_DECIMAL);
+    }
+
+    public boolean isNumeric() {
+        return isByte() ||
+               isShort() ||
+               isInt() ||
+               isLong() ||
+               isInteger() ||
+               isFloat() ||
+               isDouble() ||
+               isDecimal();
+    }
+
+    public boolean asBoolean() {
+        return Boolean.parseBoolean(getValue());
+    }
+
+    public byte asByte() {
+        return Byte.parseByte(getValue());
+    }
+
+    public short asShort() {
+        return Short.parseShort(getValue());
+    }
+
+    public BigInteger asInteger() {
+        return new BigInteger(getValue());
+    }
+
+    public int asInt() {
+        return Integer.parseInt(getValue());
+    }
+
+    public long asLong() {
+        return Long.parseLong(getValue());
+    }
+
+    public double asDouble() {
+        return Double.parseDouble(getValue());
+    }
+
+    public float asFloat() {
+        return Float.parseFloat(getValue());
+    }
+
+    public String asString() {
+        return getValue();
+    }
+
+    public URI asAnyURI() {
+        return URI.create(getValue());
+    }
+
+    public byte[] asBase64Binary() {
+        return BaseEncoding.base64().decode(getValue());
+    }
+
+    public BigDecimal asDecimal() {
+        return new BigDecimal(getValue());
+    }
+
     public static LiteralData of(boolean value) {
         return new LiteralData(XS_BOOLEAN, String.valueOf(value));
     }

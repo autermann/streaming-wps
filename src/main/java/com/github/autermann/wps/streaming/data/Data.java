@@ -26,4 +26,36 @@ public abstract class Data {
 
     Data() {
     }
+
+    public boolean isBoundingBox() {
+        return false;
+    }
+
+    public boolean isComplex() {
+        return false;
+    }
+
+    public boolean isLiteral() {
+        return false;
+    }
+
+    public boolean isReference() {
+        return false;
+    }
+
+    public ReferencedData asReference() {
+        throw new UnsupportedOperationException();
+    }
+
+    public LiteralData asLiteral() {
+        throw new UnsupportedOperationException();
+    }
+
+    public ComplexData asComplex() {
+        throw new UnsupportedOperationException();
+    }
+
+    public BoundingBoxData asBoundingBox() {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -17,7 +17,6 @@
  */
 package com.github.autermann.wps.streaming.data;
 
-
 import java.net.URI;
 
 import net.opengis.wps.x100.InputReferenceType;
@@ -31,9 +30,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-
 /**
  * TODO JavaDoc
+ *
  * @author Christian Autermann
  */
 public class ReferencedData extends Data {
@@ -45,21 +44,25 @@ public class ReferencedData extends Data {
     private final URI href;
     private final Format format;
 
-    public ReferencedData(URI href, Multimap<String, String> headers, Format format,
-                     XmlObject body) {
+    public ReferencedData(URI href, Multimap<String, String> headers,
+                          Format format,
+                          XmlObject body) {
         this(href, Method.POST, headers, format, null, body);
     }
 
-    public ReferencedData(URI href, Multimap<String, String> headers, Format format,
-                     URI body) {
+    public ReferencedData(URI href, Multimap<String, String> headers,
+                          Format format,
+                          URI body) {
         this(href, Method.POST, headers, format, body, null);
     }
 
-    public ReferencedData(URI href, Multimap<String, String> headers, Format format) {
+    public ReferencedData(URI href, Multimap<String, String> headers,
+                          Format format) {
         this(href, Method.GET, headers, format, null, null);
     }
 
-    public ReferencedData(URI href, Multimap<String, String> headers, XmlObject body) {
+    public ReferencedData(URI href, Multimap<String, String> headers,
+                          XmlObject body) {
         this(href, Method.POST, headers, null, null, body);
     }
 
@@ -96,12 +99,13 @@ public class ReferencedData extends Data {
     }
 
     private ReferencedData(URI href, Method method,
-                      Multimap<String, String> headers, Format format,
-                      URI bodyReference, XmlObject body) {
+                           Multimap<String, String> headers, Format format,
+                           URI bodyReference, XmlObject body) {
         this.bodyReference = bodyReference;
         this.body = body;
         this.method = method;
-        this.headers = headers == null ? HashMultimap.<String, String>create() : headers;
+        this.headers = headers == null ? HashMultimap.<String, String>create()
+                       : headers;
         this.href = Preconditions.checkNotNull(href);
         this.format = format == null ? new Format(null, null, null) : format;
     }
@@ -151,6 +155,16 @@ public class ReferencedData extends Data {
                 .toString()));
     }
 
+    @Override
+    public boolean isReference() {
+        return true;
+    }
+
+    @Override
+    public ReferencedData asReference() {
+        return this;
+    }
+
     public static ReferencedData of(InputReferenceType xb) {
         XmlObject body = null;
         URI bodyReference = null;
@@ -187,6 +201,5 @@ public class ReferencedData extends Data {
         GET,
         POST
     }
-
 
 }

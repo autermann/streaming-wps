@@ -23,6 +23,7 @@ import com.github.autermann.wps.commons.Format;
 
 /**
  * TODO JavaDoc
+ *
  * @author Christian Autermann
  */
 public class ComplexData extends Data {
@@ -41,6 +42,16 @@ public class ComplexData extends Data {
 
     public Format getFormat() {
         return this.format;
+    }
+
+    @Override
+    public boolean isComplex() {
+        return true;
+    }
+
+    @Override
+    public ComplexData asComplex() {
+        return this;
     }
 
 }
