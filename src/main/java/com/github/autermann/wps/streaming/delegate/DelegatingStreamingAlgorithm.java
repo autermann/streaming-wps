@@ -108,7 +108,7 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
             abstrakt = "The WebSocket URI to supply subsequent inputs " +
                        "and request intermediate outputs.",
             binding = LiteralAnyURIBinding.class)
-    public URI getInputSocketURI() {
+    public URI getSocketURI() {
         return this.configuration.getSocketURI();
     }
 
