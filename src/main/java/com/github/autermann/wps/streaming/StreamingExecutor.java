@@ -125,9 +125,9 @@ public abstract class StreamingExecutor implements
             ProcessInputs resolved = new ProcessInputs();
             for (ProcessInput input : inputs) {
                 if (input instanceof DataProcessInput) {
-                    inputs.addInput(input);
+                    resolved.addInput(input);
                 } else if (input instanceof ReferenceProcessInput) {
-                    inputs.addInputs(resolve((ReferenceProcessInput) input));
+                    resolved.addInputs(resolve((ReferenceProcessInput) input));
                 }
             }
             return resolved;
