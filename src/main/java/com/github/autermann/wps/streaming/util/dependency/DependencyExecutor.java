@@ -417,6 +417,9 @@ public class DependencyExecutor<K, I, O> {
         private void checkForExecution() {
             this.lock.lock();
             try {
+                if (this.state != State.WAITING){
+                    return;
+                }
                 if (!hasInput()) {
                     log.debug("[{}] No input is available yet", this);
                     return;
