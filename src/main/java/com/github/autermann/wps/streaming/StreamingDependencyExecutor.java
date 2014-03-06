@@ -47,7 +47,7 @@ public class StreamingDependencyExecutor extends DependencyExecutor<MessageID, I
     }
 
     public void finish() throws StreamingError {
-        getExecutor().onStop();
+        getExecutor().finish();
     }
 
     @Override
