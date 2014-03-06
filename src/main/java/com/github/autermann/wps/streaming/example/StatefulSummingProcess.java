@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
+
 import org.n52.wps.algorithm.annotation.Algorithm;
 import org.n52.wps.algorithm.annotation.Execute;
 import org.n52.wps.algorithm.annotation.LiteralDataInput;
@@ -46,29 +47,27 @@ public class StatefulSummingProcess extends AbstractAnnotatedAlgorithm {
                 private final AtomicReference<BigDecimal> state
                         = new AtomicReference<>(getInitialValue());
 
-                BigDecimal add(BigDecimal amount) {
+                void add(BigDecimal amount) {
                     for (;;) {
                         BigDecimal old = state.get();
                         BigDecimal sum = old.add(amount);
                         if (this.state.compareAndSet(old, sum)) {
-                            return sum;
+                            return;
                         }
                     }
                 }
 
                 @Override protected Optional<ProcessOutputs> execute(ProcessInputs inputs) throws StreamingError {
-                    BigDecimal sum = state.get();
                     for (ProcessInput in : inputs.getInputs(SUMMAND)) {
                         if (in.isData() && in.asData().getData().isLiteral() &&
                             in.asData().getData().asLiteral().isNumeric()) {
-                            sum = add(in.asData().getData().asLiteral().asDecimal());
+                            add(in.asData().getData().asLiteral().asDecimal());
                         } else {
                             throw new StreamingError("Incompatible input type",
                                     StreamingError.INVALID_PARAMETER_VALUE);
                         }
                     }
-                    return Optional.of(new ProcessOutputs()
-                            .addOutput(SUM, LiteralData.of(sum)));
+                    return Optional.absent();
                 }
 
                 @Override protected Optional<OutputMessage> onStop() {
@@ -76,6 +75,7 @@ public class StatefulSummingProcess extends AbstractAnnotatedAlgorithm {
                     ProcessOutputs outputs = new ProcessOutputs();
                     outputs.addOutput(SUM, LiteralData.of(state.get()));
                     message.setPayload(outputs);
+                    message.setProcessID(getProcessID());
                     return Optional.of(message);
                 }
 
