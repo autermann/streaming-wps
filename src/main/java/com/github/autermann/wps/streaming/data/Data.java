@@ -58,4 +58,7 @@ public abstract class Data {
     public BoundingBoxData asBoundingBox() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public abstract String toString();
 }

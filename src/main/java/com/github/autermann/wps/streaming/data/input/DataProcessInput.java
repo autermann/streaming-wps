@@ -19,6 +19,7 @@ package com.github.autermann.wps.streaming.data.input;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -53,5 +54,12 @@ public class DataProcessInput extends ProcessInput {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", getID())
+                .add("data", getData())
+                .toString();
+    }
 
 }

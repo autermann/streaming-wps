@@ -21,6 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.opengis.ows.x11.BoundingBoxType;
 
+import org.n52.wps.util.XMLBeansHelper;
+
+import com.google.common.base.Objects;
+
 /**
  * TODO JavaDoc
  *
@@ -46,6 +50,13 @@ public class BoundingBoxData extends Data {
     @Override
     public boolean isBoundingBox() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .addValue(getXml().xmlText(XMLBeansHelper.getXmlOptions()))
+                .toString();
     }
 
 }

@@ -25,6 +25,7 @@ import net.opengis.wps.x100.InputReferenceType.Header;
 import org.apache.xmlbeans.XmlObject;
 
 import com.github.autermann.wps.commons.Format;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -202,4 +203,16 @@ public class ReferencedData extends Data {
         POST
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .omitNullValues()
+                .add("method", getMethod())
+                .add("href", getHref())
+                .add("format", getFormat())
+                .add("body", getBody().orNull())
+                .add("bodyReference", getBodyReference().orNull())
+                .add("headers", getHeaders())
+                .toString();
+    }
 }

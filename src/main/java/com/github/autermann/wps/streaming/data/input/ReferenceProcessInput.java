@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.message.MessageID;
+import com.google.common.base.Objects;
 
 /**
  * TODO JavaDoc
@@ -75,5 +76,14 @@ public class ReferenceProcessInput extends ProcessInput {
     @Override
     public ReferenceProcessInput asReference() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", getID())
+                .add("referencedOutput", getReferencedOutput())
+                .add("referencedMessage", getReferencedMessage())
+                .toString();
     }
 }

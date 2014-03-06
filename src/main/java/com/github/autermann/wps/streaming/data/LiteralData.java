@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.io.BaseEncoding;
 
@@ -187,6 +188,16 @@ public class LiteralData extends Data {
 
     public BigDecimal asDecimal() {
         return new BigDecimal(getValue());
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .omitNullValues()
+                .add("type", getType())
+                .add("value", getValue())
+                .add("uom", getUom())
+                .toString();
     }
 
     public static LiteralData of(boolean value) {

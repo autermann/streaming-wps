@@ -20,6 +20,7 @@ package com.github.autermann.wps.streaming.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.commons.Format;
+import com.google.common.base.Objects;
 
 /**
  * TODO JavaDoc
@@ -54,4 +55,11 @@ public class ComplexData extends Data {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("format", getFormat())
+                .add("content", getContent())
+                .toString();
+    }
 }

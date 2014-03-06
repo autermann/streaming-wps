@@ -24,6 +24,7 @@ import java.util.List;
 import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
 import com.github.autermann.wps.streaming.message.MessageID;
+import com.google.common.base.Objects;
 import com.google.common.collect.LinkedListMultimap;
 
 /**
@@ -90,6 +91,13 @@ public class ProcessInputs implements Iterable<ProcessInput> {
     @Override
     public Iterator<ProcessInput> iterator() {
         return getInputs().iterator();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("inputs", this.inputs)
+                .toString();
     }
 
 }
