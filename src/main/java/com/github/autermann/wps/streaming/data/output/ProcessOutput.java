@@ -20,7 +20,7 @@ package com.github.autermann.wps.streaming.data.output;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.autermann.wps.commons.Identifiable;
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
 
 

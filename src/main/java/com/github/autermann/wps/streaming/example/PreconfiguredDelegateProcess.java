@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2014 Christian Autermann
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package com.github.autermann.wps.streaming.example;
 
 import java.io.IOException;
@@ -16,6 +33,7 @@ import org.n52.wps.algorithm.annotation.Execute;
 import org.n52.wps.algorithm.annotation.LiteralDataOutput;
 import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 import org.n52.wps.server.CapabilitiesConfiguration;
+import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.MessageBroker;
@@ -42,7 +60,7 @@ public class PreconfiguredDelegateProcess extends AbstractAnnotatedAlgorithm {
     @LiteralDataOutput(identifier = "socket-uri")
     public URI getSocketURI() { return this.socketURI; }
     @Execute
-    public void run() throws IOException, URISyntaxException {
+    public void run() throws IOException, URISyntaxException, ExceptionReport {
         ProcessConfiguration configuration = buildConfiguration();
         this.processID = configuration.getProcessID().toURI();
         this.socketURI = configuration.getSocketURI();

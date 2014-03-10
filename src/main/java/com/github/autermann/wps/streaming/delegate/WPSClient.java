@@ -48,9 +48,9 @@ import org.slf4j.LoggerFactory;
 import org.n52.wps.server.ExceptionReport;
 import org.n52.wps.util.XMLBeansHelper;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
 import com.github.autermann.wps.commons.description.ProcessDescription;
-import com.github.autermann.wps.commons.description.ProcessOutputDescription;
+import com.github.autermann.wps.commons.description.output.ProcessOutputDescription;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.data.StreamingError.RemoteException;
 import com.github.autermann.wps.streaming.data.input.DataProcessInput;
@@ -185,7 +185,7 @@ public class WPSClient implements Closeable {
                     output.asComplex().getDefaultFormat().encodeTo(xbOutput);
                 } else if (output.isBoundingBox()) {
                     if (output.asBoundingBox().getDefaultCRS().isPresent()) {
-                        xbOutput.setUom(output.asBoundingBox().getDefaultCRS().get());
+                        xbOutput.setUom(output.asBoundingBox().getDefaultCRS().get().getValue());
                     }
                 } else if (output.isLiteral()) {
                     if (output.asLiteral().getDefaultUOM().isPresent()) {

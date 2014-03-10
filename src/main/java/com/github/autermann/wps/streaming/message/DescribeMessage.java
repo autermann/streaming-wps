@@ -15,25 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.github.autermann.wps.streaming.example;
+package com.github.autermann.wps.streaming.message;
 
-import com.github.autermann.wps.streaming.ProcessConfiguration;
+import java.net.URI;
+
+import com.github.autermann.wps.streaming.util.SoapConstants;
 
 /**
  * TODO JavaDoc
  *
  * @author Christian Autermann
  */
-public abstract class InitalValueProcessConfiguration<T> extends ProcessConfiguration {
-
-    private T initialValue;
-
-    public void setInitialValue(T initialValue) {
-        this.initialValue = initialValue;
-    }
-
-    public T getInitialValue() {
-        return this.initialValue;
+public class DescribeMessage extends Message {
+    @Override
+    public URI getSOAPAction() {
+        return SoapConstants.getDescribeActionURI();
     }
 
 }

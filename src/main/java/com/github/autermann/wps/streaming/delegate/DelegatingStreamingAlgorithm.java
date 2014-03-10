@@ -26,6 +26,7 @@ import org.n52.wps.algorithm.annotation.LiteralDataInput;
 import org.n52.wps.algorithm.annotation.LiteralDataOutput;
 import org.n52.wps.io.data.binding.literal.LiteralAnyURIBinding;
 import org.n52.wps.server.AbstractAnnotatedAlgorithm;
+import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.streaming.MessageBroker;
@@ -113,7 +114,7 @@ public class DelegatingStreamingAlgorithm extends AbstractAnnotatedAlgorithm {
     }
 
     @Execute
-    public void run() {
+    public void run() throws ExceptionReport {
         MessageBroker.getInstance().addProcess(configuration);
     }
 }

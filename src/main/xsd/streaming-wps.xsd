@@ -19,108 +19,132 @@
 
 -->
 <xs:schema version="1.0" elementFormDefault="qualified"
-           xmlns="https://github.com/autermann/streaming-wps"
-           xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:wps="http://www.opengis.net/wps/1.0.0"
-           xmlns:ows="http://www.opengis.net/ows/1.1"
-           xmlns:wsa="http://www.w3.org/2005/08/addressing"
-           xmlns:xlink="http://www.w3.org/1999/xlink"
-           xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
-           targetNamespace="https://github.com/autermann/streaming-wps">
+		   xmlns="https://github.com/autermann/streaming-wps"
+		   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:wps="http://www.opengis.net/wps/1.0.0"
+		   xmlns:ows="http://www.opengis.net/ows/1.1"
+		   xmlns:wsa="http://www.w3.org/2005/08/addressing"
+		   xmlns:xlink="http://www.w3.org/1999/xlink"
+		   xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+		   targetNamespace="https://github.com/autermann/streaming-wps">
 
-    <xs:import namespace="http://www.opengis.net/wps/1.0.0"
-               schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd" />
-    <xs:import namespace="http://www.opengis.net/ows/1.1"
-               schemaLocation="http://schemas.opengis.net/ows/1.1.0/owsAll.xsd" />
-    <xs:import namespace="http://www.w3.org/1999/xlink"
-               schemaLocation="http://www.w3.org/1999/xlink.xsd" />
-    <xs:import namespace="http://www.w3.org/2005/08/addressing"
-               schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd" />
-    <xs:import namespace="http://www.w3.org/2003/05/soap-envelope"
-               schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
+	<xs:import namespace="http://www.opengis.net/wps/1.0.0"
+			   schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd" />
+	<xs:import namespace="http://www.opengis.net/ows/1.1"
+			   schemaLocation="http://schemas.opengis.net/ows/1.1.0/owsAll.xsd" />
+	<xs:import namespace="http://www.w3.org/1999/xlink"
+			   schemaLocation="http://www.w3.org/1999/xlink.xsd" />
+	<xs:import namespace="http://www.w3.org/2005/08/addressing"
+			   schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd" />
+	<xs:import namespace="http://www.w3.org/2003/05/soap-envelope"
+			   schemaLocation="http://www.w3.org/2003/05/soap-envelope"/>
 
-    <xs:include schemaLocation="staticInputs.xsd" />
+	<xs:include schemaLocation="staticInputs.xsd" />
 
-    <xs:element name="ProcessID" type="ProcessIDType" />
-    <xs:complexType name="ProcessIDType">
-        <xs:simpleContent>
-            <xs:extension base="xs:anyURI" />
-        </xs:simpleContent>
-    </xs:complexType>
+	<xs:element name="ProcessID" type="ProcessIDType" />
+	<xs:complexType name="ProcessIDType">
+		<xs:simpleContent>
+			<xs:extension base="xs:anyURI" />
+		</xs:simpleContent>
+	</xs:complexType>
 
-    <xs:element name="InputMessage" type="InputMessageType" />
-    <xs:complexType name="InputMessageType">
-        <xs:sequence>
-            <xs:element ref="ProcessID" />
-            <xs:element ref="Inputs" />
-        </xs:sequence>
-        <xs:attribute name="receiveFaults"  type="xs:boolean"  use="optional" default="false"/>
-    </xs:complexType>
+	<xs:element name="InputMessage" type="InputMessageType" />
+	<xs:complexType name="InputMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+			<xs:element ref="Inputs" />
+		</xs:sequence>
+		<xs:attribute name="receiveFaults"  type="xs:boolean"  use="optional" default="false"/>
+	</xs:complexType>
 
-    <xs:element name="Inputs" type="InputsType" />
-    <xs:complexType name="InputsType">
-        <xs:choice maxOccurs="unbounded">
-            <xs:element ref="ReferenceInput" />
-            <xs:element ref="StreamingInput" />
-        </xs:choice>
-    </xs:complexType>
+	<xs:element name="Inputs" type="InputsType" />
+	<xs:complexType name="InputsType">
+		<xs:choice maxOccurs="unbounded">
+			<xs:element ref="ReferenceInput" />
+			<xs:element ref="StreamingInput" />
+		</xs:choice>
+	</xs:complexType>
 
-    <xs:element name="StreamingInput" type="wps:InputType" />
+	<xs:element name="StreamingInput" type="wps:InputType" />
 
-    <xs:element name="ReferenceInput" type="ReferenceInputType" />
-    <xs:complexType name="ReferenceInputType">
-        <xs:sequence>
-            <xs:element ref="ows:Identifier" />
-            <xs:element name="Reference">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element ref="wsa:MessageID" />
-                        <xs:element name="Output" type="ows:CodeType" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-        </xs:sequence>
-    </xs:complexType>
+	<xs:element name="ReferenceInput" type="ReferenceInputType" />
+	<xs:complexType name="ReferenceInputType">
+		<xs:sequence>
+			<xs:element ref="ows:Identifier" />
+			<xs:element name="Reference">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="wsa:MessageID" />
+						<xs:element name="Output" type="ows:CodeType" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 
-    <xs:element name="OutputMessage" type="OutputMessageType" />
-    <xs:complexType name="OutputMessageType">
-        <xs:sequence>
-            <xs:element ref="ProcessID" />
-            <!--<xs:element name="Inputs" type="wps:DataInputsType" minOccurs="0"/>-->
-            <xs:element ref="Outputs" />
-        </xs:sequence>
-    </xs:complexType>
+	<xs:element name="OutputMessage" type="OutputMessageType" />
+	<xs:complexType name="OutputMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+			<!--<xs:element name="Inputs" type="wps:DataInputsType" minOccurs="0"/>-->
+			<xs:element ref="Outputs" />
+		</xs:sequence>
+	</xs:complexType>
 
-    <xs:element name="Outputs" type="OutputsType" />
-    <xs:complexType name="OutputsType">
-        <xs:sequence>
-            <xs:element ref="Output" maxOccurs="unbounded" />
-        </xs:sequence>
-    </xs:complexType>
+	<xs:element name="Outputs" type="OutputsType" />
+	<xs:complexType name="OutputsType">
+		<xs:sequence>
+			<xs:element ref="Output" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
 
-    <xs:element name="Output" type="wps:OutputDataType"/>
+	<xs:element name="Output" type="wps:OutputDataType"/>
 
-    <xs:element name="OutputRequestMessage" type="OutputRequestMessageType" />
-    <xs:complexType name="OutputRequestMessageType">
-        <xs:sequence>
-            <xs:element ref="ProcessID" />
-        </xs:sequence>
-        <xs:attribute name="includeInputs" type="xs:boolean" use="optional" default="false"/>
-    </xs:complexType>
+	<xs:element name="OutputRequestMessage" type="OutputRequestMessageType" />
+	<xs:complexType name="OutputRequestMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+		</xs:sequence>
+		<xs:attribute name="includeInputs" type="xs:boolean" use="optional" default="false"/>
+	</xs:complexType>
 
 
-    <xs:element name="StopMessage" type="StopMessageType" />
-    <xs:complexType name="StopMessageType">
-        <xs:sequence>
-            <xs:element ref="ProcessID" />
-        </xs:sequence>
-    </xs:complexType>
+	<xs:element name="StopMessage" type="StopMessageType" />
+	<xs:complexType name="StopMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+		</xs:sequence>
+	</xs:complexType>
 
-    <xs:element name="ErrorMessage" type="ErrorMessageType" />
-    <xs:complexType name="ErrorMessageType">
-        <xs:sequence>
-            <xs:element ref="ProcessID" />
-            <xs:element ref="ows:Exception" maxOccurs="unbounded" />
-        </xs:sequence>
-    </xs:complexType>
+	<xs:element name="ErrorMessage" type="ErrorMessageType" />
+	<xs:complexType name="ErrorMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+			<xs:element ref="ows:Exception" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="DescribeMessage" type="DescribeMessageType" />
+	<xs:complexType name="DescribeMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="DescriptionMessage" type="DescriptionMessageType" />
+	<xs:complexType name="DescriptionMessageType">
+		<xs:sequence>
+			<xs:element ref="ProcessID" />
+			<xs:element name="StreamingProcessDescription" type="StreamingProcessDescriptionType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="StreamingProcessDescriptionType">
+		<xs:complexContent>
+			<xs:extension base="wps:ProcessDescriptionType">
+				<xs:attribute name="intermediateResults" type="xs:boolean" use="required" />
+				<xs:attribute name="finalResult" type="xs:boolean" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 </xs:schema>

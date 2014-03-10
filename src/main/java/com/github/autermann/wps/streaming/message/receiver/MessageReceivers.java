@@ -22,6 +22,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.autermann.wps.streaming.message.DescribeMessage;
+import com.github.autermann.wps.streaming.message.DescriptionMessage;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.Message;
@@ -33,9 +35,7 @@ import com.google.common.base.Preconditions;
 public final class MessageReceivers {
 
     private static final MessageReceiver NULL = new MessageReceiver() {
-        @Override
-        public void receive(Message message) {
-        }
+        @Override public void receive(Message message) { }
     };
 
     public static MessageReceiver nullReceiver() {
@@ -82,6 +82,12 @@ public final class MessageReceivers {
             this.delegate.receive(message);
         }
 
+        @Override
+        protected void receiveDescribe(DescribeMessage message) {
+            log.debug("Receiving describe message {}", message);
+            this.delegate.receive(message);
+        }
+
     }
 
     private static class OutgoingMessageFilter extends OutgoingMessageReceiver {
@@ -106,6 +112,12 @@ public final class MessageReceivers {
             this.delegate.receive(message);
         }
 
+        @Override
+        protected void receiveDescription(DescriptionMessage message) {
+            log.debug("Receiving description message {}", message);
+            this.delegate.receive(message);
+        }
+
     }
 
     private static class SplittingMessageReceiver extends AbstractMessageReceiver {
@@ -120,27 +132,37 @@ public final class MessageReceivers {
 
         @Override
         protected void receiveError(ErrorMessage message) {
-            outgoing.receive(message);
+            this.outgoing.receive(message);
         }
 
         @Override
         protected void receiveOutputRequest(OutputRequestMessage message) {
-            incoming.receive(message);
+            this.incoming.receive(message);
         }
 
         @Override
         protected void receiveStop(StopMessage message) {
-            incoming.receive(message);
+            this.incoming.receive(message);
         }
 
         @Override
         protected void receiveInput(InputMessage message) {
-            incoming.receive(message);
+            this.incoming.receive(message);
         }
 
         @Override
         protected void receiveOutput(OutputMessage message) {
-            outgoing.receive(message);
+            this.outgoing.receive(message);
+        }
+
+        @Override
+        protected void receiveDescribe(DescribeMessage message) {
+            this.incoming.receive(message);
+        }
+
+        @Override
+        protected void receiveDescription(DescriptionMessage message) {
+            this.outgoing.receive(message);
         }
     }
 

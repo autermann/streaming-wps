@@ -22,6 +22,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.n52.wps.server.ExceptionReport;
+
 import com.github.autermann.wps.streaming.data.StreamingError;
 import com.github.autermann.wps.streaming.message.Message;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
@@ -38,7 +40,7 @@ public class MessageBroker implements MessageReceiver{
     private static final Logger log = LoggerFactory.getLogger(MessageBroker.class);
     private final Map<StreamingProcessID, StreamingProcess> processes = Maps.newConcurrentMap();
 
-    public void addProcess(ProcessConfiguration configuration) {
+    public void addProcess(ProcessConfiguration configuration) throws ExceptionReport {
         StreamingProcess process = new StreamingProcess(configuration);
         log.debug("Created process {}", process.getID());
         this.processes.put(process.getID(), process);

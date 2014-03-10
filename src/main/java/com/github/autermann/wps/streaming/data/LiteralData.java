@@ -34,18 +34,18 @@ import com.google.common.io.BaseEncoding;
  * @author Christian Autermann
  */
 public class LiteralData extends Data {
-    private static final String XS_BOOLEAN = "xs:boolean";
-    private static final String XS_BYTE = "xs:byte";
-    private static final String XS_SHORT = "xs:short";
-    private static final String XS_INTEGER = "xs:integer";
-    private static final String XS_INT = "xs:int";
-    private static final String XS_LONG = "xs:long";
-    private static final String XS_DOUBLE = "xs:double";
-    private static final String XS_FLOAT = "xs:float";
-    private static final String XS_STRING = "xs:string";
-    private static final String XS_ANY_URI = "xs:anyURI";
-    private static final String XS_BASE64_BINARY = "xs:base64Binary";
-    private static final String XS_DECIMAL = "xs:decimal";
+    public static final String XS_BOOLEAN = "xs:boolean";
+    public static final String XS_BYTE = "xs:byte";
+    public static final String XS_SHORT = "xs:short";
+    public static final String XS_INTEGER = "xs:integer";
+    public static final String XS_INT = "xs:int";
+    public static final String XS_LONG = "xs:long";
+    public static final String XS_DOUBLE = "xs:double";
+    public static final String XS_FLOAT = "xs:float";
+    public static final String XS_STRING = "xs:string";
+    public static final String XS_ANY_URI = "xs:anyURI";
+    public static final String XS_BASE64_BINARY = "xs:base64Binary";
+    public static final String XS_DECIMAL = "xs:decimal";
 
     private final String type;
     private final String value;

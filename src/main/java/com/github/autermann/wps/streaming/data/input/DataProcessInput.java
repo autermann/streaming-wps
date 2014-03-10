@@ -17,7 +17,7 @@
  */
 package com.github.autermann.wps.streaming.data.input;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.data.Data;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

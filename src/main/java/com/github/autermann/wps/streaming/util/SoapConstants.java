@@ -38,6 +38,10 @@ public final class SoapConstants {
             = URI.create(ACTION_URI_PREFIX + "output");
     private static final URI ERROR_ACTION
             = URI.create(ACTION_URI_PREFIX + "error");
+    private static final URI DESCRIBE_ACTION
+            = URI.create(ACTION_URI_PREFIX + "describe");
+    private static final URI DESCRIPTION_ACTION
+            = URI.create(ACTION_URI_PREFIX + "description");
 
     private SoapConstants() {
     }
@@ -80,5 +84,21 @@ public final class SoapConstants {
 
     public static URI getErrorActionURI() {
         return ERROR_ACTION;
+    }
+
+    public static URI getDescribeActionURI() {
+        return DESCRIBE_ACTION;
+    }
+
+    public static String getDescribeAction() {
+        return getDescribeActionURI().toString();
+    }
+
+    public static URI getDescriptonActionURI() {
+        return DESCRIPTION_ACTION;
+    }
+
+    public static String getDescriptonAction() {
+        return getDescriptonAction().toString();
     }
 }

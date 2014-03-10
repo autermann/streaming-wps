@@ -17,6 +17,8 @@
  */
 package com.github.autermann.wps.streaming.message.receiver;
 
+import com.github.autermann.wps.streaming.message.DescribeMessage;
+import com.github.autermann.wps.streaming.message.DescriptionMessage;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.Message;
@@ -31,7 +33,8 @@ import com.github.autermann.wps.streaming.message.StopMessage;
 public abstract class AbstractMessageReceiver implements MessageReceiver {
 
     @Override
-    public void receive(Message message) throws UnsupportedMessageTypeException {
+    public void receive(Message message)
+            throws UnsupportedMessageTypeException {
         if (message instanceof InputMessage) {
             receiveInput((InputMessage) message);
         } else if (message instanceof StopMessage) {
@@ -42,6 +45,10 @@ public abstract class AbstractMessageReceiver implements MessageReceiver {
             receiveOutput((OutputMessage) message);
         } else if (message instanceof ErrorMessage) {
             receiveError((ErrorMessage) message);
+        } else if (message instanceof DescribeMessage) {
+            receiveDescribe((DescribeMessage) message);
+        } else if (message instanceof DescriptionMessage) {
+            receiveDescription((DescriptionMessage) message);
         } else {
             throw new UnsupportedMessageTypeException(message);
         }
@@ -60,6 +67,12 @@ public abstract class AbstractMessageReceiver implements MessageReceiver {
             throws UnsupportedMessageTypeException;
 
     protected abstract void receiveOutput(OutputMessage message)
+            throws UnsupportedMessageTypeException;
+
+    protected abstract void receiveDescribe(DescribeMessage message)
+            throws UnsupportedMessageTypeException;
+
+    protected abstract void receiveDescription(DescriptionMessage message)
             throws UnsupportedMessageTypeException;
 
 }

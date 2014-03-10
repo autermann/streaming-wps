@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.autermann.wps.streaming.data.StreamingError;
+import com.github.autermann.wps.streaming.message.DescribeMessage;
+import com.github.autermann.wps.streaming.message.DescriptionMessage;
 import com.github.autermann.wps.streaming.message.ErrorMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.Message;
@@ -41,6 +43,7 @@ import com.github.autermann.wps.streaming.message.receiver.MessageReceivers;
 import com.github.autermann.wps.streaming.util.dependency.CyclicDependencyException;
 import com.github.autermann.wps.streaming.util.dependency.MissingInputException;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 
 /**
  * TODO JavaDoc
@@ -53,6 +56,7 @@ public class StreamingProcessor extends AbstractMessageReceiver {
     private final DelegatingMessageReceiver toClients
             = new DelegatingMessageReceiver();
     private StreamingDependencyExecutor executor;
+    private StreamingProcessDescription description;
 
     public StreamingProcessor(StreamingProcessID id) {
         this.id = id;
@@ -165,6 +169,24 @@ public class StreamingProcessor extends AbstractMessageReceiver {
         }
         log.info("Setting input for {}", message.getID());
         executor.setInput(message.getID(), message);
+    }
+
+    @Override
+    protected void receiveDescribe(DescribeMessage describe) {
+        DescriptionMessage description = new DescriptionMessage();
+        description.setRelatedMessage(RelationshipType.Reply, describe);
+        description.setProcessID(this.id);
+        description.setPayload(this.description);
+        describe.getReceiver().receive(description);
+    }
+
+    @Override
+    protected void receiveDescription(DescriptionMessage message) {
+        // this shouldn't happen
+    }
+
+    public void setDescription(StreamingProcessDescription description) {
+        this.description = Preconditions.checkNotNull(description);
     }
 
 }

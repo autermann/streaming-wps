@@ -36,6 +36,8 @@ import org.w3.x2005.x08.addressing.AttributedURIType;
 
 import com.github.autermann.wps.streaming.message.Message;
 import com.github.autermann.wps.streaming.message.xml.AbstractMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.DescribeMessageEncoding;
+import com.github.autermann.wps.streaming.message.xml.DescriptionMessageEncoding;
 import com.github.autermann.wps.streaming.message.xml.ErrorMessageEncoding;
 import com.github.autermann.wps.streaming.message.xml.InputMessageEncoding;
 import com.github.autermann.wps.streaming.message.xml.MessageEncoding;
@@ -62,11 +64,17 @@ public class SocketMessageEncoding
         AbstractMessageEncoding<?> ome = new OutputMessageEncoding();
         AbstractMessageEncoding<?> rme = new OutputRequestMessageEncoding();
         AbstractMessageEncoding<?> sme = new StopMessageEncoding();
-
+        AbstractMessageEncoding<?> dme = new DescriptionMessageEncoding();
+        AbstractMessageEncoding<?> dmd = new DescribeMessageEncoding();
         ENCODINGS = ImmutableMap.<URI, MessageEncoding<?>>builder()
-                .put(eme.getAction(), eme).put(ime.getAction(), ime)
-                .put(ome.getAction(), ome).put(rme.getAction(), rme)
-                .put(sme.getAction(), sme).build();
+                .put(eme.getAction(), eme)
+                .put(ime.getAction(), ime)
+                .put(ome.getAction(), ome)
+                .put(rme.getAction(), rme)
+                .put(sme.getAction(), sme)
+                .put(dmd.getAction(), dmd)
+                .put(dme.getAction(), dme)
+                .build();
     }
 
     @Override

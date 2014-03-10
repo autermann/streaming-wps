@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.http.client.utils.URIBuilder;
 
 import org.n52.wps.server.CapabilitiesConfiguration;
+import org.n52.wps.server.ExceptionReport;
 import org.n52.wps.server.WebProcessingService;
 
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
@@ -87,6 +88,8 @@ public abstract class ProcessConfiguration {
     }
 
     public abstract StreamingExecutor createStreamingExecutor(MessageReceiver callback);
+
+    public abstract StreamingProcessDescription describe() throws ExceptionReport;
 
     private static URI createSocketURI() {
         try {

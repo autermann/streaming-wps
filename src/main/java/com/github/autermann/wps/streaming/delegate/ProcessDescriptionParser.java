@@ -17,7 +17,6 @@
  */
 package com.github.autermann.wps.streaming.delegate;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,7 +26,7 @@ import net.opengis.wps.x100.ProcessDescriptionsDocument;
 import org.apache.xmlbeans.XmlException;
 
 import com.github.autermann.wps.commons.Format;
-import com.github.autermann.wps.commons.description.ProcessDescription;
+import com.github.autermann.wps.commons.description.xml.ProcessDescriptionDecoder;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
 
 /**
@@ -36,6 +35,8 @@ import com.github.autermann.wps.streaming.util.SchemaConstants;
  * @author Christian Autermann
  */
 public class ProcessDescriptionParser extends AbstractParser {
+    private final ProcessDescriptionDecoder decoder
+            = new ProcessDescriptionDecoder();
 
     public ProcessDescriptionParser() {
         super(new Format(MEDIA_TYPE_TEXT_XML, ENCODING_UTF8,
@@ -47,9 +48,12 @@ public class ProcessDescriptionParser extends AbstractParser {
     protected ProcessDescriptionBinding parse(InputStream input)
             throws IOException {
         try {
-            ProcessDescriptionsDocument doc = ProcessDescriptionsDocument.Factory.parse(input);
-            ProcessDescriptionType xbPd = doc.getProcessDescriptions().getProcessDescriptionArray(0);
-            return new ProcessDescriptionBinding(ProcessDescription.of(xbPd));
+            ProcessDescriptionsDocument doc
+                    = ProcessDescriptionsDocument.Factory.parse(input);
+            ProcessDescriptionType xbPd = doc.getProcessDescriptions()
+                    .getProcessDescriptionArray(0);
+            return new ProcessDescriptionBinding(decoder
+                    .decodeProcessDescription(xbPd));
         } catch (XmlException ex) {
             throw new RuntimeException(ex);
         }

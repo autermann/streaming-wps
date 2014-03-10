@@ -19,7 +19,7 @@ package com.github.autermann.wps.streaming.data.input;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.message.MessageID;
 import com.google.common.base.Objects;
 

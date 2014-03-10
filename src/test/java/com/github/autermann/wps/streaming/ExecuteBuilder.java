@@ -17,7 +17,6 @@
  */
 package com.github.autermann.wps.streaming;
 
-import com.github.autermann.wps.streaming.example.AddAlgorithm;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,12 +28,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.commons.Format;
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.data.LiteralData;
 import com.github.autermann.wps.streaming.data.ReferencedData;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm;
 import com.github.autermann.wps.streaming.delegate.WPSClient;
+import com.github.autermann.wps.streaming.example.AddAlgorithm;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
 import com.google.common.collect.Lists;
 

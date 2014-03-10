@@ -17,6 +17,7 @@
  */
 package com.github.autermann.wps.streaming.message.receiver;
 
+import com.github.autermann.wps.streaming.message.DescribeMessage;
 import com.github.autermann.wps.streaming.message.InputMessage;
 import com.github.autermann.wps.streaming.message.OutputRequestMessage;
 import com.github.autermann.wps.streaming.message.StopMessage;
@@ -46,4 +47,9 @@ public abstract class OutgoingMessageReceiver extends AbstractMessageReceiver {
         throw new UnsupportedMessageTypeException(message);
     }
 
+    @Override
+    protected void receiveDescribe(DescribeMessage message)
+            throws UnsupportedMessageTypeException {
+        throw new UnsupportedMessageTypeException(message);
+    }
 }

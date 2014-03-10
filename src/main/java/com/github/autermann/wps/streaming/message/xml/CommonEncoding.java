@@ -29,7 +29,7 @@ import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlString;
 
 import com.github.autermann.wps.commons.Format;
-import com.github.autermann.wps.commons.description.OwsCodeType;
+import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.data.BoundingBoxData;
 import com.github.autermann.wps.streaming.data.ComplexData;
 import com.github.autermann.wps.streaming.data.Data;

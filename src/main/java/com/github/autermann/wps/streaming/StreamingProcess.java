@@ -19,6 +19,8 @@ package com.github.autermann.wps.streaming;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.n52.wps.server.ExceptionReport;
+
 import com.github.autermann.wps.commons.Identifiable;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceiver;
 import com.github.autermann.wps.streaming.message.receiver.MessageReceivers;
@@ -32,7 +34,7 @@ public class StreamingProcess implements Identifiable<StreamingProcessID> {
     private final ProcessConfiguration configuration;
     private final MessageReceiver fromClient;
 
-    public StreamingProcess(ProcessConfiguration configuration) {
+    public StreamingProcess(ProcessConfiguration configuration) throws ExceptionReport {
         this.configuration = checkNotNull(configuration);
         StreamingProcessor processor = new StreamingProcessor(this.configuration.getProcessID());
         this.fromClient = MessageReceivers.onlyIncomingMessages(processor);
@@ -42,6 +44,7 @@ public class StreamingProcess implements Identifiable<StreamingProcessID> {
                 configuration.createThreadPool(),
                 configuration.createMessageRepository());
         processor.setExecutor(dependencyExecutor);
+        processor.setDescription(configuration.describe());
     }
 
     @Override
