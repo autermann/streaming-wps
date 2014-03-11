@@ -34,7 +34,6 @@ import com.github.autermann.wps.commons.description.output.BoundingBoxOutputDesc
 import com.github.autermann.wps.commons.description.output.ComplexOutputDescription;
 import com.github.autermann.wps.commons.description.output.LiteralOutputDescription;
 import com.github.autermann.wps.commons.description.output.ProcessOutputDescription;
-import com.github.autermann.wps.commons.description.ows.OwsCodeType;
 import com.github.autermann.wps.streaming.ProcessConfiguration;
 import com.github.autermann.wps.streaming.StreamingExecutor;
 import com.github.autermann.wps.streaming.StreamingProcessDescription;
@@ -73,53 +72,47 @@ public class DelegatingProcessConfiguration extends ProcessConfiguration {
 
     @Override
     public StreamingProcessDescription describe() throws ExceptionReport {
-        StreamingProcessDescription pd = new StreamingProcessDescription(
-                new OwsCodeType(getProcessID().toString()),
-                getProcessDescription().getTitle(),
-                getProcessDescription().getAbstract().orNull(),
-                getProcessDescription().getVersion(), false, true);
-        describeInputs(pd);
-        describeOutputs(pd);
-        return pd;
+        StreamingProcessDescription.Builder<?,?> b = StreamingProcessDescription.builder()
+                .withIdentifier(getProcessID().toString())
+                .withTitle(getProcessDescription().getTitle())
+                .withAbstract(getProcessDescription().getAbstract().orNull())
+                .withVersion(getProcessDescription().getVersion())
+                .statusSupported(false)
+                .storeSupported(getProcessDescription().isStoreSupported());
+        describeInputs(b);
+        describeOutputs(b);
+        return b.build();
     }
 
-    private void describeOutputs(StreamingProcessDescription pd) {
+    private void describeOutputs(StreamingProcessDescription.Builder<?,?> pd) {
         for (ProcessOutputDescription output : getProcessDescription().getOutputDescriptions()) {
+            final ProcessOutputDescription.Builder<?,?> ob;
             if (output.isBoundingBox()) {
-                BoundingBoxOutputDescription bboxOutput = output.asBoundingBox();
-                pd.addOutput(new BoundingBoxOutputDescription(
-                        bboxOutput.getID(),
-                        bboxOutput.getTitle(),
-                        bboxOutput.getAbstract().orNull(),
-                        bboxOutput.getDefaultCRS().orNull(),
-                        null));
+                ob = BoundingBoxOutputDescription.builder()
+                        .withDefaultCRS(output.asBoundingBox().getDefaultCRS().orNull());
             } else if (output.isComplex()) {
-                ComplexOutputDescription complexOutput = output.asComplex();
-                pd.addOutput(new ComplexOutputDescription(
-                        complexOutput.getID(),
-                        complexOutput.getTitle(),
-                        complexOutput.getAbstract().orNull(),
-                        complexOutput.getDefaultFormat(),
-                        null));
+                ob = ComplexOutputDescription.builder()
+                        .withDefaultFormat(output.asComplex().getDefaultFormat());
             } else if (output.isLiteral()) {
-                LiteralOutputDescription literalOutput = output.asLiteral();
-                pd.addOutput(new LiteralOutputDescription(
-                        literalOutput.getID(),
-                        literalOutput.getTitle(),
-                        literalOutput.getAbstract().orNull(),
-                        literalOutput.getDataType(),
-                        literalOutput.getDefaultUOM().orNull(),
-                        null));
+                ob = LiteralOutputDescription.builder()
+                        .withDataType(output.asLiteral().getDataType())
+                        .withDefaultUOM(output.asLiteral().getDefaultUOM().orNull());
+            } else {
+                continue;
             }
+            pd.withOutput(ob
+                    .withIdentifier(output.getID())
+                    .withTitle(output.getTitle())
+                    .withAbstract(output.getAbstract().orNull()));
         }
     }
 
-    private void describeInputs(StreamingProcessDescription pd)
+    private void describeInputs(StreamingProcessDescription.Builder<?,?> pd)
             throws ExceptionReport {
         for (ProcessInputDescription input : getProcessDescription().getInputDescriptions()) {
             Optional<ProcessInputDescription> updated = updateOccurence(input);
             if (updated.isPresent()) {
-                pd.addInput(updated.get());
+                pd.withInput(updated.get());
             }
         }
     }
@@ -131,34 +124,37 @@ public class DelegatingProcessConfiguration extends ProcessConfiguration {
             updated = null;
         } else if (input.isBoundingBox()) {
             BoundingBoxInputDescription bboxInput = input.asBoundingBox();
-            updated = new BoundingBoxInputDescription(
-                    bboxInput.getID(),
-                    bboxInput.getTitle(),
-                    bboxInput.getAbstract().orNull(),
-                    newOccurence.get(),
-                    bboxInput.getDefaultCRS().orNull(),
-                    bboxInput.getSupportedCRS());
+            updated = BoundingBoxInputDescription.builder()
+                    .withIdentifier(bboxInput.getID())
+                    .withTitle(bboxInput.getTitle())
+                    .withAbstract(bboxInput.getAbstract().orNull())
+                    .withOccurence(newOccurence.get())
+                    .withDefaultCRS(bboxInput.getDefaultCRS().orNull())
+                    .withSupportedCRS(bboxInput.getSupportedCRS())
+                    .build();
         } else if (input.isComplex()) {
             ComplexInputDescription complexInput = input.asComplex();
-            updated = new ComplexInputDescription(
-                    complexInput.getID(),
-                    complexInput.getTitle(),
-                    complexInput.getAbstract().orNull(),
-                    newOccurence.get(),
-                    complexInput.getDefaultFormat(),
-                    complexInput.getFormats(),
-                    complexInput.getMaximumMegabytes().orNull());
+            updated = ComplexInputDescription.builder()
+                    .withIdentifier(complexInput.getID())
+                    .withTitle(complexInput.getTitle())
+                    .withAbstract(complexInput.getAbstract().orNull())
+                    .withOccurence(newOccurence.get())
+                    .withDefaultFormat(complexInput.getDefaultFormat())
+                    .withSupportedFormat(complexInput.getSupportedFormats())
+                    .withMaximumMegabytes(complexInput.getMaximumMegabytes().orNull())
+                    .build();
         } else if (input.isLiteral()) {
             LiteralInputDescription literalInput = input.asLiteral();
-            updated = new LiteralInputDescription(
-                    literalInput.getID(),
-                    literalInput.getTitle(),
-                    literalInput.getAbstract().orNull(),
-                    newOccurence.get(),
-                    literalInput.getDataType(),
-                    literalInput.getAllowedValues(),
-                    literalInput.getDefaultUOM().orNull(),
-                    literalInput.getUOMs());
+            updated = LiteralInputDescription.builder()
+                    .withIdentifier(literalInput.getID())
+                    .withTitle(literalInput.getTitle())
+                    .withAbstract(literalInput.getAbstract().orNull())
+                    .withOccurence(newOccurence.get())
+                    .withDataType(literalInput.getDataType())
+                    .withAllowedValues(literalInput.getAllowedValues())
+                    .withDefaultUOM(literalInput.getDefaultUOM().orNull())
+                    .withSupportedUOM(literalInput.getSupportedUOM())
+                    .build();
         } else {
             updated = null;
         }

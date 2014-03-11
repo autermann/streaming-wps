@@ -18,8 +18,6 @@
 package com.github.autermann.wps.streaming;
 
 import com.github.autermann.wps.commons.description.ProcessDescription;
-import com.github.autermann.wps.commons.description.ows.OwsCodeType;
-import com.github.autermann.wps.commons.description.ows.OwsLanguageString;
 
 /**
  * TODO JavaDoc
@@ -30,23 +28,46 @@ public class StreamingProcessDescription extends ProcessDescription {
     private final boolean finalResult;
     private final boolean intermediateResults;
 
-    public StreamingProcessDescription(OwsCodeType identifier,
-                                       OwsLanguageString title,
-                                       OwsLanguageString abstrakt,
-                                       String version,
-                                       boolean finalResult,
-                                       boolean intermediateResults) {
-        super(identifier, title, abstrakt, version);
-        this.finalResult = finalResult;
-        this.intermediateResults = intermediateResults;
+    public StreamingProcessDescription(Builder<?, ?> builder) {
+        super(builder);
+        this.finalResult = builder.finalResult;
+        this.intermediateResults = builder.intermediateResults;
     }
 
     public boolean isFinalResult() {
-        return finalResult;
+        return this.finalResult;
     }
 
     public boolean isIntermediateResults() {
-        return intermediateResults;
+        return this.intermediateResults;
     }
 
+    public static Builder<?, ?> builder() {
+        return new BuilderImpl();
+    }
+
+    private static class BuilderImpl extends Builder<StreamingProcessDescription, BuilderImpl> {
+        @Override
+        public StreamingProcessDescription build() {
+            return new StreamingProcessDescription(this);
+        }
+    }
+
+    public static abstract class Builder<T extends StreamingProcessDescription, B extends Builder<T, B>>
+            extends ProcessDescription.Builder<T, B> {
+        private boolean finalResult;
+        private boolean intermediateResults;
+
+        @SuppressWarnings("unchecked")
+        public B hasFinalResult(boolean finalResult) {
+            this.finalResult = finalResult;
+            return (B) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public B hasIntermediateResults(boolean intermediateResults) {
+            this.intermediateResults = intermediateResults;
+            return (B) this;
+        }
+    }
 }

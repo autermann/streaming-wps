@@ -19,11 +19,12 @@ package com.github.autermann.wps.streaming.message.xml;
 
 import java.net.URI;
 
+import net.opengis.wps.x100.ProcessDescriptionType;
+
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
-import com.github.autermann.wps.commons.description.ows.OwsCodeType;
-import com.github.autermann.wps.commons.description.ows.OwsLanguageString;
+import com.github.autermann.wps.commons.description.ProcessDescription;
 import com.github.autermann.wps.commons.description.xml.ProcessDescriptionDecoder;
 import com.github.autermann.wps.commons.description.xml.ProcessDescriptionEncoder;
 import com.github.autermann.wps.streaming.StreamingProcessDescription;
@@ -78,8 +79,7 @@ public class DescriptionMessageEncoding extends AbstractMessageEncoding<Descript
         DescriptionMessageDocument document = (DescriptionMessageDocument) body;
         DescriptionMessageType xbMessage = document.getDescriptionMessage();
         message.setProcessID(decodeProcessID(xbMessage.getProcessID()));
-        message.setPayload(decoder.decodeStreamingProcessDescription(xbMessage
-                .getStreamingProcessDescription()));
+        message.setPayload((StreamingProcessDescription) decoder.decodeProcessDescription(xbMessage.getStreamingProcessDescription()));
     }
 
     private static class StreamingProcessDescriptionEncoder extends ProcessDescriptionEncoder {
@@ -97,21 +97,13 @@ public class DescriptionMessageEncoding extends AbstractMessageEncoding<Descript
 
     private static class StreamingProcessDescriptionDecoder extends ProcessDescriptionDecoder {
 
-        public StreamingProcessDescription decodeStreamingProcessDescription(
-                StreamingProcessDescriptionType xb) {
-            StreamingProcessDescription pd
-                    = new StreamingProcessDescription(
-                            OwsCodeType.of(xb.getIdentifier()),
-                            OwsLanguageString.of(xb.getTitle()),
-                            OwsLanguageString.of(xb.getAbstract()),
-                            xb.getProcessVersion(),
-                            xb.getFinalResult(),
-                            xb.getIntermediateResults());
-            pd.addInputs(decodeProcessInputs(xb.getDataInputs()));
-            pd.addOutputs(decodeProcessOutputs(xb.getProcessOutputs()));
-            return pd;
+        @Override
+        protected ProcessDescription.Builder<?, ?> newProcessDescriptionBuilder(ProcessDescriptionType xb) {
+            StreamingProcessDescriptionType spdt = (StreamingProcessDescriptionType) xb;
+            return StreamingProcessDescription.builder()
+                    .hasFinalResult(spdt.getFinalResult())
+                    .hasIntermediateResults(spdt.getIntermediateResults());
         }
-
     }
 
 }

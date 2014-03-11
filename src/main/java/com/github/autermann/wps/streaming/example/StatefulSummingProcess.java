@@ -18,7 +18,6 @@
 package com.github.autermann.wps.streaming.example;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,11 +28,10 @@ import org.n52.wps.algorithm.annotation.LiteralDataOutput;
 import org.n52.wps.server.AbstractAnnotatedAlgorithm;
 import org.n52.wps.server.ExceptionReport;
 
-import com.github.autermann.wps.commons.description.input.InputOccurence;
 import com.github.autermann.wps.commons.description.input.LiteralInputDescription;
+import com.github.autermann.wps.commons.description.output.LiteralOutputDescription;
 import com.github.autermann.wps.commons.description.ows.OwsAllowedValues;
 import com.github.autermann.wps.commons.description.ows.OwsCodeType;
-import com.github.autermann.wps.commons.description.ows.OwsLanguageString;
 import com.github.autermann.wps.streaming.MessageBroker;
 import com.github.autermann.wps.streaming.StreamingExecutor;
 import com.github.autermann.wps.streaming.StreamingProcessDescription;
@@ -110,26 +108,24 @@ public class StatefulSummingProcess extends AbstractAnnotatedAlgorithm {
         @Override
         public StreamingProcessDescription describe()
                 throws ExceptionReport {
-            StreamingProcessDescription pd = new StreamingProcessDescription(
-                    new OwsCodeType(getProcessID().toString()),
-                    new OwsLanguageString(StatefulSummingProcess.class.getSimpleName()),
-                    null, // no abstract
-                    PROCESS_VERSION,
-                    true, // one final result
-                    false // no intermediate results
-            );
-            pd.addInput(new LiteralInputDescription(
-                    SUMMAND,
-                    new OwsLanguageString(SUMMAND.getValue()),
-                    null, // no abstract
-                    new InputOccurence(BigInteger.ONE,
-                                       BigInteger.valueOf(Integer.MAX_VALUE)),
-                    LiteralData.XS_DECIMAL,
-                    OwsAllowedValues.any(),
-                    null, // no default UOM
-                    null  // no supported UOMs
-            ));
-            return pd;
+            return StreamingProcessDescription.builder()
+                    .withIdentifier(getProcessID().toString())
+                    .withTitle(StatefulSummingProcess.class.getSimpleName())
+                    .withVersion(PROCESS_VERSION)
+                    .withInput(LiteralInputDescription.builder()
+                            .withIdentifier(SUMMAND)
+                            .withTitle(SUMMAND.getValue())
+                            .withMinimalOccurence(1)
+                            .withMaximalOccurence(Integer.MAX_VALUE)
+                            .withDataType(LiteralData.XS_DECIMAL)
+                            .withAllowedValues(OwsAllowedValues.any()))
+                    .withOutput(LiteralOutputDescription.builder()
+                            .withIdentifier(SUM)
+                            .withIdentifier(SUM.getValue())
+                            .withDataType(LiteralData.XS_DECIMAL))
+                    .hasFinalResult(true)
+                    .hasIntermediateResults(false)
+                    .build();
         }
     }
 }
