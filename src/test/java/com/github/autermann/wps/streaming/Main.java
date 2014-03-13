@@ -17,28 +17,28 @@
  */
 package com.github.autermann.wps.streaming;
 
-import com.github.autermann.wps.streaming.example.AddAlgorithm;
 import com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm;
 import com.github.autermann.wps.streaming.delegate.ProcessDescriptionParser;
 import com.github.autermann.wps.streaming.delegate.StaticInputParser;
+import com.github.autermann.wps.streaming.example.AddAlgorithm;
 import com.github.autermann.wps.streaming.example.PreconfiguredDelegateProcess;
 import com.github.autermann.wps.streaming.example.StatefulSummingProcess;
 
-
 /**
  * TODO JavaDoc
+ *
  * @author Christian Autermann
  */
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        StreamingWPS wps = new StreamingWPS("localhost", 12121);
-        wps.addAlgorithm(DelegatingStreamingAlgorithm.class);
-        wps.addAlgorithm(AddAlgorithm.class);
-        wps.addAlgorithm(StatefulSummingProcess.class);
-        wps.addAlgorithm(PreconfiguredDelegateProcess.class);
-        wps.addParser(ProcessDescriptionParser.class);
-        wps.addParser(StaticInputParser.class);
-        wps.start();
+        new StreamingWPS("localhost", 12121)
+                .addAlgorithm(DelegatingStreamingAlgorithm.class)
+                .addAlgorithm(AddAlgorithm.class)
+                .addAlgorithm(StatefulSummingProcess.class)
+                .addAlgorithm(PreconfiguredDelegateProcess.class)
+                .addParser(ProcessDescriptionParser.class)
+                .addParser(StaticInputParser.class)
+                .start();
     }
 }
