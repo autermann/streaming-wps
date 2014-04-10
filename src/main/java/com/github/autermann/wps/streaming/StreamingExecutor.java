@@ -60,6 +60,10 @@ public abstract class StreamingExecutor implements
         this.id = checkNotNull(configuration.getProcessID());
     }
 
+    public StreamingProcessID getProcessID() {
+        return this.id;
+    }
+
     @Override
     public OutputMessage execute(
             InputMessage input, Iterable<OutputMessage> dependencies)

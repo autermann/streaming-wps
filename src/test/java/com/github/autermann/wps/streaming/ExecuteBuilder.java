@@ -21,22 +21,27 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import net.opengis.ows.x11.BoundingBoxType;
+
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.xmlbeans.XmlException;
 
 import org.n52.wps.server.ExceptionReport;
 
 import com.github.autermann.wps.commons.Format;
 import com.github.autermann.wps.commons.description.ows.OwsCodeType;
+import com.github.autermann.wps.streaming.data.BoundingBoxData;
+import com.github.autermann.wps.streaming.data.ComplexData;
 import com.github.autermann.wps.streaming.data.LiteralData;
 import com.github.autermann.wps.streaming.data.ReferencedData;
+import com.github.autermann.wps.streaming.data.input.DataProcessInput;
 import com.github.autermann.wps.streaming.data.input.ProcessInputs;
 import com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm;
-import com.github.autermann.wps.streaming.delegate.WPSClient;
 import com.github.autermann.wps.streaming.example.AddAlgorithm;
+import com.github.autermann.wps.streaming.message.xml.CommonEncoding;
 import com.github.autermann.wps.streaming.util.SchemaConstants;
-import com.google.common.collect.Lists;
+import com.github.autermann.wps.streaming.xml.InputsDocument;
+import com.github.autermann.wps.streaming.xml.InputsType;
 
 /**
  * TODO JavaDoc
@@ -65,7 +70,8 @@ public class ExecuteBuilder {
     public static final String SERVICE_TYPE_WPS = "WPS";
 
     public static void main(String[] args)
-            throws URISyntaxException, IOException, ExceptionReport {
+            throws URISyntaxException, IOException, ExceptionReport,
+                   XmlException {
         OwsCodeType processId
                 = new OwsCodeType(DelegatingStreamingAlgorithm.PROCESS_ID);
 
@@ -73,17 +79,38 @@ public class ExecuteBuilder {
                 .addDataInput(INPUT_REMOTE_WPS_URL, LiteralData.of(WPS_URL))
                 .addDataInput(INPUT_REMOTE_PROCESS_DESCRIPTION,
                               new ReferencedData(new URIBuilder(WPS_URL)
-                .addParameter(PARAMETER_SERVICE, SERVICE_TYPE_WPS)
-                .addParameter(PARAMETER_VERSION, SERVICE_VERSION_100)
-                .addParameter(PARAMETER_REQUEST, OPERATION_DESCRIBE_PROCESS)
-                .addParameter(PARAMETER_IDENTIFIER, AddAlgorithm.class.getName())
-                .build(), PROCESS_DESCRIPTION_FORMAT));
+                        .addParameter(PARAMETER_SERVICE, SERVICE_TYPE_WPS)
+                        .addParameter(PARAMETER_VERSION, SERVICE_VERSION_100)
+                        .addParameter(PARAMETER_REQUEST, OPERATION_DESCRIBE_PROCESS)
+                        .addParameter(PARAMETER_IDENTIFIER, AddAlgorithm.class
+                                .getName())
+                        .build(), PROCESS_DESCRIPTION_FORMAT));
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             WPSClient client = new WPSClient(WPS_URL, httpClient)) {
-            client.execute(processId, inputs,
-                           Lists.newArrayList(OUTPUT_PROCESS_ID,
-                                              OUTPUT_SOCKET_URI));
-        }
+//        StaticInputsDocument doc = StaticInputsDocument.Factory.newInstance();
+        InputsDocument doc = InputsDocument.Factory.newInstance();
+        InputsType d = doc.addNewInputs();//doc.addNewStaticInputs();
+
+        CommonEncoding ce = new CommonEncoding();
+        ce.encodeInput(d.addNewStreamingInput(),
+                       new DataProcessInput("intput1", LiteralData.of("input1")));
+        ce.encodeInput(d.addNewStreamingInput(),
+                       new DataProcessInput("intput2", new ComplexData(new Format("application/xml", "UTF-8"), "<hello>world</hello>")));
+        ce.encodeInput(d.addNewStreamingInput(),
+                       new DataProcessInput("intput3", new BoundingBoxData(BoundingBoxType.Factory
+                .parse("<wps:BoundingBoxData xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" crs=\"EPSG:4326\" dimensions=\"2\">\n" +
+                       "        <ows:LowerCorner>52.2 7.0</ows:LowerCorner>\n" +
+                       "        <ows:UpperCorner>55.2 15.0</ows:UpperCorner>\n" +
+                       "      </wps:BoundingBoxData>"))));
+        ce
+                .encodeInput(d.addNewStreamingInput(), new DataProcessInput("input4", new ReferencedData(URI
+                                        .create("http://geoprocessing.demo.52north.org:8080/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=topp:tasmania_roads&srs=EPSG:4326&outputFormat=GML3"), new Format("application/xml", "UTF-8", "http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"))));
+
+        System.out.println(doc.xmlText(SchemaConstants.XML_OPTIONS));
+//        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+//             WPSClient client = new WPSClient(WPS_URL, httpClient)) {
+//            client.execute(processId, inputs,
+//                           Lists.newArrayList(OUTPUT_PROCESS_ID,
+//                                              OUTPUT_SOCKET_URI));
+//        }
     }
 }
