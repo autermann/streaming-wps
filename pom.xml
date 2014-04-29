@@ -12,8 +12,8 @@
     <url>http://github.com/autermann/streaming-wps</url>
     <licenses>
         <license>
-            <name>GNU General Public License (GPL) v2</name>
-            <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+            <name>GNU General Public License (GPL) v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
         </license>
     </licenses>
     <developers>
