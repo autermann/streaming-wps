@@ -39,7 +39,7 @@
     </ciManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <wps-version>3.3.0</wps-version>
+        <wps-version>3.3.1</wps-version>
         <jetty-version>9.1.0.v20131115</jetty-version>
         <slf4j-version>1.7.5</slf4j-version>
         <xml-version>1.1.0</xml-version>
